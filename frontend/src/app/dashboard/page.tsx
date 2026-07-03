@@ -1,26 +1,23 @@
-"use client";
-
-import { DashboardScreen } from "@/dashboard/screens/DashboardScreen";
-import { DashboardTemplate } from "@/common/organisms/DashboardTemplate";
-import { useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
-import { EXECUTIVE_SUMMARY_QUERY_KEY } from "@/dashboard/hooks/useExecutiveSummary";
+// app/dashboard/page.tsx
+import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
 import { fetchExecutiveSummary } from "@/common/api/client";
+import { EXECUTIVE_SUMMARY_QUERY_KEY } from "@/dashboard/hooks/useExecutiveSummary";
+import { DashboardTemplate } from "@/common/organisms/DashboardTemplate";
+import { DashboardScreen } from "@/dashboard/screens/DashboardScreen";
 
-export default function DashboardPage() {
-  const queryClient = useQueryClient();
-
-  // Prefetch data when page loads
-  useEffect(() => {
-    queryClient.prefetchQuery({
-      queryKey: [EXECUTIVE_SUMMARY_QUERY_KEY],
-      queryFn: fetchExecutiveSummary,
-    });
-  }, [queryClient]);
+export default async function DashboardPage() {
+  const queryClient = new QueryClient();
+  
+  await queryClient.prefetchQuery({
+    queryKey: [EXECUTIVE_SUMMARY_QUERY_KEY],
+    queryFn: fetchExecutiveSummary,
+  });
 
   return (
-    <DashboardTemplate title="Command center">
-      <DashboardScreen />
-    </DashboardTemplate>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <DashboardTemplate title="Command center">
+        <DashboardScreen />
+      </DashboardTemplate>
+    </HydrationBoundary>
   );
 }
