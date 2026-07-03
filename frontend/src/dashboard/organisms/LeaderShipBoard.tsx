@@ -1,8 +1,8 @@
 "use client";
 
-import { AttentionPanel } from "@/dashboard/organisms/AttentionPanel";
+import { AttentionPanel } from "@/dashboard/molecules/AttentionPanel";
 import { AIStatusPanel } from "@/dashboard/molecules/AIStatusPanel";
-import { QuickActions } from "@/dashboard/organisms/QuickActions";
+import { QuickActions } from "@/dashboard/molecules/QuickActions";
 import { MetricsDashboard } from "@/dashboard/organisms/MetricsDashboard";
 import { EvaluationDashboard } from "@/dashboard/organisms/EvaluationDashboard";
 import { EvaluationHarnessPanel } from "@/dashboard/organisms/EvaluationHarnessPanel";
