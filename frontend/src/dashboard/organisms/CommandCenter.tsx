@@ -10,14 +10,12 @@ import { useExecutiveSummary } from "@/dashboard/hooks/useExecutiveSummary";
 
 export function CommandCenter() {
   const { isAdmin, isManager, isLeadership } = useRole();
-  const { summary: executiveSummary, loading, error} = useExecutiveSummary();
+  const { summary: executiveSummary, error, loading} = useExecutiveSummary();
 
-    // Optional: Show loading state
     if (loading) {
       return <div>Loading dashboard...</div>;
     }
   
-    // Optional: Show error state
     if (error) {
       return <div>Error loading data: {error}</div>;
     }
