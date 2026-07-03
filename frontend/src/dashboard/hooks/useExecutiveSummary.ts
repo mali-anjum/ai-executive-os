@@ -1,27 +1,30 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { fetchExecutiveSummary } from "@/common/api/client";
 import type { ExecutiveSummary } from "@/common/types";
 
+export const EXECUTIVE_SUMMARY_QUERY_KEY = "executiveSummary";
 
 export function useExecutiveSummary() {
-    const [summary, setSummary] = useState<ExecutiveSummary | null>(null);
-    const [error, setError] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
-  
-    const load = useCallback(async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await fetchExecutiveSummary();
-        setSummary(data);
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Failed to load executive summary");
-      } finally {
-        setLoading(false);
-      }
-    }, []);
-  
-    return { summary, error, loading, load };
-  }
+  const {
+    data: summary,
+    error,
+    isLoading,
+    refetch,
+  } = useQuery<ExecutiveSummary>({
+    queryKey: [EXECUTIVE_SUMMARY_QUERY_KEY],
+    queryFn: fetchExecutiveSummary,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+  });
+
+  return {
+    summary: summary ?? null,
+    error: error instanceof Error ? error.message : null,
+    loading: isLoading,
+    load: refetch,
+  };
+}

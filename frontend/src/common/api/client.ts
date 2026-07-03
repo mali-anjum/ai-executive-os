@@ -157,9 +157,7 @@ export async function fetchExecutiveSummary(): Promise<ExecutiveSummary> {
 }
 
 export async function fetchUnansweredReport(): Promise<UnansweredQuestionsReport> {
-  const res = await authFetch(`${API_BASE}/evaluation/unanswered`, {
-    cache: "no-store",
-  });
+  const res = await authFetch(`${API_BASE}/evaluation/unanswered`)
   return parseJson(res);
 }
 

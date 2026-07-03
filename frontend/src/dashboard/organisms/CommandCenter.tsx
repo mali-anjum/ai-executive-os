@@ -6,11 +6,23 @@ import { useRole } from "@/common/hooks/useRole";
 import { EmployeeWelcome } from "@/dashboard/atoms/EmployeeWelcome";
 import { ManagerWelcome } from "@/dashboard/atoms/ManagerWelcome";
 import { LeadershipDashboard } from "@/dashboard/organisms/LeaderShipBoard";
-import { ExecutiveSummary } from "@/common/types";
+import { useExecutiveSummary } from "@/dashboard/hooks/useExecutiveSummary";
 
-
-export function CommandCenter({executiveSummary}: {executiveSummary: ExecutiveSummary | null}) {
+export function CommandCenter() {
   const { isAdmin, isManager, isLeadership } = useRole();
+  const { summary: executiveSummary, loading, error} = useExecutiveSummary();
+
+    // Optional: Show loading state
+    if (loading) {
+      return <div>Loading dashboard...</div>;
+    }
+  
+    // Optional: Show error state
+    if (error) {
+      return <div>Error loading data: {error}</div>;
+    }
+  
+
 
   if (!isLeadership) {
     return (
@@ -29,13 +41,17 @@ export function CommandCenter({executiveSummary}: {executiveSummary: ExecutiveSu
       <div className="space-y-6">
         <ManagerWelcome />
         <LeadershipDashboard 
-        showDemoSeed={false} 
-        executiveSummary={executiveSummary ?? null} />
+          showDemoSeed={false} 
+          executiveSummary={executiveSummary} 
+        />
       </div>
     );
   }
 
-  return <LeadershipDashboard 
-  showDemoSeed={isAdmin} 
-  executiveSummary={executiveSummary ?? null} />;
+  return (
+    <LeadershipDashboard 
+      showDemoSeed={isAdmin} 
+      executiveSummary={executiveSummary} 
+    />
+  );
 }

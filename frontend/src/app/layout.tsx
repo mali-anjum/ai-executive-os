@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/common/organisms/providers/ThemeProvider";
 import { AuthProvider } from "@/auth/organisms/AuthProvider";
 import { readThemeScript } from "@/common/lib/theme";
 import "./globals.css";
+import { Providers } from "./providers";
 
 const heading = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -49,7 +50,9 @@ export default function RootLayout({
         />
         <StoreProvider>
           <ThemeProvider>
-            <AuthProvider>{children}</AuthProvider>
+            <AuthProvider>
+              <Providers>{children}</Providers>
+            </AuthProvider>
           </ThemeProvider>
         </StoreProvider>
       </body>

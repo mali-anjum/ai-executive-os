@@ -20,7 +20,7 @@ export function LeadershipDashboard({ showDemoSeed, executiveSummary }: { showDe
   
     return (
       <div className="space-y-8">
-        <ExecutiveSummaryDashboard summary={executiveSummary ?? null} />
+        <ExecutiveSummaryDashboard summary={executiveSummary} />
   
         <section
           className="grid gap-6 lg:grid-cols-3"
