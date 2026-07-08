@@ -8,7 +8,7 @@ import { EvaluationDashboard } from "@/dashboard/organisms/EvaluationDashboard";
 import { EvaluationHarnessPanel } from "@/dashboard/organisms/EvaluationHarnessPanel";
 import { PlatformHighlights } from "@/dashboard/organisms/PlatformHighlights";
 import { ExecutiveSummaryDashboard } from "@/dashboard/organisms/ExecutiveSummaryDashboard";
-import { UnansweredQuestionsReport } from "@/dashboard/organisms/UnansweredQuestionsReport";
+import { UnansweredQuestionsReport } from "@/dashboard/molecules/UnansweredQuestionsReport";
 import { DemoSeedCard } from "@/dashboard/organisms/DemoSeedCard";
 import { useFeatureFlag } from "@/common/hooks/useFeatureFlag";
 import { ExecutiveSummary } from "@/common/types";
