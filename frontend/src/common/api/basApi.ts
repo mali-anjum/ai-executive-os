@@ -8,5 +8,3 @@ export const baseApi = createApi({
   tagTypes: Object.values(API_TAGS),
   endpoints: () => ({}),
 });
-
-export default baseApi;

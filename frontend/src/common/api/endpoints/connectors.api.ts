@@ -1,4 +1,4 @@
-import { baseApi } from '@/common/api/baseApi';
+import { baseApi } from '@/common/api/basApi';
 import { API_TAGS } from '@/common/api/tags';
 import type { IngestResponse } from '@/common/types';
 
