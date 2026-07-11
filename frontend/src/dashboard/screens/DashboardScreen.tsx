@@ -6,19 +6,25 @@ import { useRole } from "@/common/hooks/useRole";
 import { EmployeeWelcome } from "@/dashboard/atoms/EmployeeWelcome";
 import { ManagerWelcome } from "@/dashboard/atoms/ManagerWelcome";
 import { LeadershipDashboard } from "@/dashboard/organisms/LeaderShipBoard";
-import { useExecutiveSummary } from "@/dashboard/hooks/useExecutiveSummary";
+import { useDashboard } from "@/dashboard/hooks/useDashboard";
 import { Skeleton } from "@/common/atoms/ui/skeleton";
+import { getApiErrorMessage } from "@/common/api/errorMessage";
 
 export function DashboardScreen() {
   const { isAdmin, isManager, isLeadership } = useRole();
-  const { summary: executiveSummary, error, loading} = useExecutiveSummary();
+  // const { summary: executiveSummary, error, loading} = useExecutiveSummary();
+  const {
+    executiveSummary,
+    isLoading,
+    error
+} = useDashboard();
 
-    if (loading) {
+    if (isLoading) {
       return <DashboardSkeleton />
     }
   
     if (error) {
-      return <div>Error loading data: {error}</div>;
+      return <div>Error loading data: {getApiErrorMessage(error)}</div>;
     }
   
   if (!isLeadership) {
@@ -39,7 +45,7 @@ export function DashboardScreen() {
         <ManagerWelcome />
         <LeadershipDashboard 
           showDemoSeed={false} 
-          executiveSummary={executiveSummary} 
+          executiveSummary={executiveSummary.data ?? null} 
         />
       </div>
     );
@@ -48,7 +54,7 @@ export function DashboardScreen() {
   return (
     <LeadershipDashboard 
       showDemoSeed={isAdmin} 
-      executiveSummary={executiveSummary} 
+      executiveSummary={executiveSummary.data ?? null} 
     />
   ); 
 }

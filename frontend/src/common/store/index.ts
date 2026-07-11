@@ -1,4 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
+
+import { baseApi } from "@/common/api/baseApi";
+
 import chatReducer from "@/chat/state/chatSlice";
 import analyticsReducer from "@/dashboard/state/analyticsSlice";
 import knowledgeReducer from "@/knowledge/state/knowledgeSlice";
@@ -14,10 +17,16 @@ export const makeStore = () =>
       chat: chatReducer,
       user: userReducer,
       org: orgReducer,
+
       tickets: ticketReducer,
       knowledge: knowledgeReducer,
       analytics: analyticsReducer,
+
+      [baseApi.reducerPath]: baseApi.reducer,
     },
+
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware().concat(baseApi.middleware),
   });
 
 export type AppStore = ReturnType<typeof makeStore>;

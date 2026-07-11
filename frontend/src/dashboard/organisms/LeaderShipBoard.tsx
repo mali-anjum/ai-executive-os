@@ -14,7 +14,7 @@ import { useFeatureFlag } from "@/common/hooks/useFeatureFlag";
 import { ExecutiveSummary } from "@/common/types";
 
 
-export function LeadershipDashboard({ showDemoSeed, executiveSummary }: { showDemoSeed: boolean, executiveSummary: ExecutiveSummary | null }) {
+export function LeadershipDashboard({ showDemoSeed, executiveSummary }: { showDemoSeed: boolean, executiveSummary: ExecutiveSummary | null}) {
     const analytics = useFeatureFlag("ANALYTICS_DASHBOARD_ENABLED");
     const evaluation = useFeatureFlag("EVALUATION_DASHBOARD_ENABLED");
   
