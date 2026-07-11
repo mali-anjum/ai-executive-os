@@ -11,16 +11,15 @@ import { ExecutiveSummaryDashboard } from "@/dashboard/organisms/ExecutiveSummar
 import { UnansweredQuestionsReport } from "@/dashboard/molecules/UnansweredQuestionsReport";
 import { DemoSeedCard } from "@/dashboard/organisms/DemoSeedCard";
 import { useFeatureFlag } from "@/common/hooks/useFeatureFlag";
-import { ExecutiveSummary } from "@/common/types";
 
 
-export function LeadershipDashboard({ showDemoSeed, executiveSummary }: { showDemoSeed: boolean, executiveSummary: ExecutiveSummary | null}) {
+export function LeadershipDashboard({ showDemoSeed }: { showDemoSeed: boolean }) {
     const analytics = useFeatureFlag("ANALYTICS_DASHBOARD_ENABLED");
     const evaluation = useFeatureFlag("EVALUATION_DASHBOARD_ENABLED");
   
     return (
       <div className="space-y-8">
-        <ExecutiveSummaryDashboard summary={executiveSummary} />
+        <ExecutiveSummaryDashboard />
   
         <section
           className="grid gap-6 lg:grid-cols-3"

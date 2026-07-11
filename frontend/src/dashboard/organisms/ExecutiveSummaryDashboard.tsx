@@ -3,9 +3,24 @@
 import { Clock, MessageSquare, TrendingUp, AlertTriangle } from "lucide-react";
 import { KpiCard } from "@/dashboard/atoms/KpiCard";
 import { Card, CardContent } from "@/common/atoms/ui/card";
-import { ExecutiveSummary } from "@/common/types";
+import { useFetchExecutiveSummaryQuery } from "@/common/api/endpoints/dashboard.api";
 
-export function ExecutiveSummaryDashboard({ summary }: { summary: ExecutiveSummary | null }) {
+export function ExecutiveSummaryDashboard() {
+  const { data: summary, isLoading, error } = useFetchExecutiveSummaryQuery();
+
+  if (isLoading) {
+    return (
+      <div className="text-sm text-muted-foreground">Loading summary...</div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-sm text-destructive">
+        Failed to load executive summary.
+      </div>
+    );
+  }
 
   const scopeNote = summary?.department_scope
     ? `Scoped to ${summary.department_scope} department`
@@ -14,7 +29,9 @@ export function ExecutiveSummaryDashboard({ summary }: { summary: ExecutiveSumma
   return (
     <section className="space-y-4" aria-label="Executive summary">
       <div>
-        <h2 className="font-display text-lg font-semibold">Executive summary</h2>
+        <h2 className="font-display text-lg font-semibold">
+          Executive summary
+        </h2>
         <p className="text-sm text-muted-foreground">
           ROI at a glance — {scopeNote}
         </p>
@@ -40,7 +57,8 @@ export function ExecutiveSummaryDashboard({ summary }: { summary: ExecutiveSumma
         <KpiCard
           label="Knowledge gaps"
           value={String(
-          (summary?.knowledge_gaps?.length ?? 0) + (summary?.low_confidence_unanswered ?? 0)
+            (summary?.knowledge_gaps?.length ?? 0) +
+              (summary?.low_confidence_unanswered ?? 0),
           )}
           hint={`${summary?.escalated_queries} escalated`}
           icon={AlertTriangle}
@@ -49,7 +67,9 @@ export function ExecutiveSummaryDashboard({ summary }: { summary: ExecutiveSumma
       {(summary?.knowledge_gaps?.length ?? 0) > 0 ? (
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm font-medium text-foreground">Top knowledge gaps</p>
+            <p className="text-sm font-medium text-foreground">
+              Top knowledge gaps
+            </p>
             <ul className="mt-3 space-y-2 text-sm">
               {summary?.knowledge_gaps?.slice(0, 5).map((row) => (
                 <li
