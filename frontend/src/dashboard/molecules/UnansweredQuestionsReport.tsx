@@ -1,25 +1,24 @@
 "use client";
 
-import { useEffect } from "react";
-import { Skeleton } from "@/common/atoms/ui/skeleton";
 import { ErrorState } from "@/common/molecules/ErrorState";
 import { GapList } from "@/dashboard/molecules/GapList";
-import { useUnansweredReport } from "@/dashboard/hooks/useUnansweredReport";
+import { useGetUnansweredReportQuery } from "@/common/api/endpoints/evaluation.api";
 
 export function UnansweredQuestionsReport() {
-  const { report, error, loading, load } = useUnansweredReport();
-
-  // ✅ Effect only triggers the load function, doesn't manage state directly
-  useEffect(() => {
-    load();
-  }, [load]);
+  const { data: report, error, isLoading, refetch } = useGetUnansweredReportQuery();
 
   if (error) {
-    return <ErrorState message={error} onRetry={load} />;
+    return (
+      <ErrorState 
+        title="Failed to load reports" 
+        error={error} 
+        onRetry={refetch} 
+      />
+    );
   }
 
-  if (loading || !report) {
-    return <Skeleton className="h-48 w-full rounded-xl" />;
+  if (isLoading || !report) {
+    return <div className="text-sm text-muted-foreground">Loading Unanswered Reports...</div>;
   }
 
   return (

@@ -149,17 +149,17 @@ export async function rejectTicket(ticketId: string): Promise<TicketRecord> {
   return parseJson<TicketRecord>(res);
 }
 
-export async function fetchExecutiveSummary(): Promise<ExecutiveSummary> {
-  const res = await authFetch(`${API_BASE}/analytics/executive-summary`, {
-    cache: "no-store",
-  });
-  return parseJson(res);
-}
+// export async function fetchExecutiveSummary(): Promise<ExecutiveSummary> {
+//   const res = await authFetch(`${API_BASE}/analytics/executive-summary`, {
+//     cache: "no-store",
+//   });
+//   return parseJson(res);
+// }
 
-export async function fetchUnansweredReport(): Promise<UnansweredQuestionsReport> {
-  const res = await authFetch(`${API_BASE}/evaluation/unanswered`)
-  return parseJson(res);
-}
+// export async function fetchUnansweredReport(): Promise<UnansweredQuestionsReport> {
+//   const res = await authFetch(`${API_BASE}/evaluation/unanswered`)
+//   return parseJson(res);
+// }
 
 export async function seedDemoTenant(): Promise<DemoSeedResponse> {
   const res = await authFetch(`${API_BASE}/demo/seed`, { method: "POST" });

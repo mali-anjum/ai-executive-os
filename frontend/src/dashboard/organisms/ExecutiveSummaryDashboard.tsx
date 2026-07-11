@@ -3,10 +3,10 @@
 import { Clock, MessageSquare, TrendingUp, AlertTriangle } from "lucide-react";
 import { KpiCard } from "@/dashboard/atoms/KpiCard";
 import { Card, CardContent } from "@/common/atoms/ui/card";
-import { useFetchExecutiveSummaryQuery } from "@/common/api/endpoints/dashboard.api";
+import { useGetExecutiveSummaryQuery } from "@/common/api/endpoints/dashboard.api";
 
 export function ExecutiveSummaryDashboard() {
-  const { data: summary, isLoading, error } = useFetchExecutiveSummaryQuery();
+  const { data: summary, isLoading, error } = useGetExecutiveSummaryQuery();
 
   if (isLoading) {
     return (

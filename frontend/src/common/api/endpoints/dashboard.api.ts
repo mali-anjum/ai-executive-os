@@ -7,12 +7,12 @@ import type {
 
 export const dashboardApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    fetchAnalytics: builder.query<AnalyticsDashboard, void>({
+    getAnalytics: builder.query<AnalyticsDashboard, void>({
       query: () => '/analytics/dashboard',
       providesTags: [API_TAGS.ANALYTICS],
     }),
     
-    fetchExecutiveSummary: builder.query<ExecutiveSummary, void>({
+    getExecutiveSummary: builder.query<ExecutiveSummary, void>({
       query: () => '/analytics/executive-summary',
       providesTags: [API_TAGS.ANALYTICS],
     }),
@@ -21,6 +21,6 @@ export const dashboardApi = baseApi.injectEndpoints({
 });
 
 export const {
-  useFetchAnalyticsQuery,
-  useFetchExecutiveSummaryQuery,
+  useGetAnalyticsQuery,
+  useGetExecutiveSummaryQuery,
 } = dashboardApi;

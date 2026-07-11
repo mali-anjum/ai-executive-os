@@ -8,12 +8,12 @@ import type {
 
 export const evaluationApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    fetchEvaluationMetrics: builder.query<EvaluationMetrics, void>({
+    getEvaluationMetrics: builder.query<EvaluationMetrics, void>({
       query: () => '/evaluation/metrics',
       providesTags: [API_TAGS.EVALUATION],
     }),
     
-    fetchUnansweredReport: builder.query<UnansweredQuestionsReport, void>({
+    getUnansweredReport: builder.query<UnansweredQuestionsReport, void>({
       query: () => '/evaluation/unanswered',
       providesTags: [API_TAGS.EVALUATION],
     }),
@@ -30,7 +30,7 @@ export const evaluationApi = baseApi.injectEndpoints({
 });
 
 export const {
-  useFetchEvaluationMetricsQuery,
-  useFetchUnansweredReportQuery,
+  useGetEvaluationMetricsQuery,
+  useGetUnansweredReportQuery,
   useRunEvaluationHarnessMutation,
 } = evaluationApi;
