@@ -14,7 +14,8 @@ import {
   updateAssistantMessage,
   type ChatMessage,
 } from "@/chat/state/chatSlice";
-import { escalateQueryToHuman, type Citation } from "@/common/api/client";
+import { type Citation } from "@/common/api/client";
+import { useEscalateQueryMutation } from "@/common/api/endpoints/knowledge.api";
 
 export function useChat() {
   const dispatch = useAppDispatch();
@@ -24,6 +25,8 @@ export function useChat() {
   const selectedCitation = useAppSelector((s) => s.chat.selectedCitation);
   const sourcesPanelOpen = useAppSelector((s) => s.chat.sourcesPanelOpen);
   const { streamQuery } = useQueryStream();
+  
+  const [escalateQuery] = useEscalateQueryMutation();
 
   const sendMessage = useCallback(
     async (text: string) => {
@@ -95,12 +98,13 @@ export function useChat() {
     ) => {
       const msg = messages.find((m) => m.id === assistantId);
       try {
-        const result = await escalateQueryToHuman({
+        const result = await escalateQuery({
           query: userQuery,
           queryLogId: msg?.query_log_id ?? null,
           confidenceScore: confidenceScore ?? msg?.confidence_score ?? null,
           answerPreview: msg?.content ?? null,
-        });
+        }).unwrap();
+        
         dispatch(
           updateAssistantMessage({
             id: assistantId,
@@ -108,23 +112,26 @@ export function useChat() {
               msg?.content ??
               "Your question has been escalated to human support.",
             escalated: true,
-            escalation_ticket_id: result.escalation_ticket_id,
+            escalation_ticket_id: result.escalation_ticket_id, 
           })
         );
       } catch (err) {
+        const errorData = err as Record<string, unknown> | undefined;
+        const errorMessage = String(errorData?.message || errorData?.error || "unknown error");
+
         dispatch(
           updateAssistantMessage({
             id: assistantId,
             content:
               (msg?.content ?? "") +
               "\n\n(Could not escalate: " +
-              (err instanceof Error ? err.message : "unknown error") +
+              errorMessage +
               ")",
           })
         );
       }
     },
-    [dispatch, messages]
+    [dispatch, messages, escalateQuery] 
   );
 
   return {
