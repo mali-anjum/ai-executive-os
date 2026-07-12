@@ -154,30 +154,30 @@ export async function seedDemoTenant(): Promise<DemoSeedResponse> {
   return parseJson(res);
 }
 
-export async function escalateQueryToHuman(payload: {
-  query: string;
-  queryLogId?: string | null;
-  confidenceScore?: number | null;
-  answerPreview?: string | null;
-}): Promise<{ escalated: boolean; escalation_ticket_id: string; message: string }> {
-  const res = await authFetch(`${API_BASE}/query/escalate`, {
-    method: "POST",
-    body: JSON.stringify({
-      query: payload.query,
-      query_log_id: payload.queryLogId ?? null,
-      confidence_score: payload.confidenceScore ?? null,
-      answer_preview: payload.answerPreview ?? null,
-    }),
-  });
-  return parseJson(res);
-}
+// export async function escalateQueryToHuman(payload: {
+//   query: string;
+//   queryLogId?: string | null;
+//   confidenceScore?: number | null;
+//   answerPreview?: string | null;
+// }): Promise<{ escalated: boolean; escalation_ticket_id: string; message: string }> {
+//   const res = await authFetch(`${API_BASE}/query/escalate`, {
+//     method: "POST",
+//     body: JSON.stringify({
+//       query: payload.query,
+//       query_log_id: payload.queryLogId ?? null,
+//       confidence_score: payload.confidenceScore ?? null,
+//       answer_preview: payload.answerPreview ?? null,
+//     }),
+//   });
+//   return parseJson(res);
+// }
 
-export async function fetchEvaluationMetrics(): Promise<EvaluationMetrics> {
-  const res = await authFetch(`${API_BASE}/evaluation/metrics`, {
-    cache: "no-store",
-  });
-  return parseJson<EvaluationMetrics>(res);
-}
+// export async function fetchEvaluationMetrics(): Promise<EvaluationMetrics> {
+//   const res = await authFetch(`${API_BASE}/evaluation/metrics`, {
+//     cache: "no-store",
+//   });
+//   return parseJson<EvaluationMetrics>(res);
+// }
 
 export async function runEvaluationHarness(): Promise<HarnessRunResponse> {
   const res = await authFetch(`${API_BASE}/evaluation/harness/run`, {

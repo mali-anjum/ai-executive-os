@@ -1,27 +1,38 @@
 "use client";
 
-import { useEffect } from "react";
 import { useFeatureFlag } from "@/common/hooks/useFeatureFlag";
-import { Card, CardContent, CardHeader, CardTitle } from "@/common/atoms/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/common/atoms/ui/card";
 import { Skeleton } from "@/common/atoms/ui/skeleton";
 import { ErrorState } from "@/common/molecules/ErrorState";
 import { Metric } from "@/dashboard/atoms/Metric";
-import { useEvaluationMetrics } from "@/dashboard/hooks/useEvaluationMetrics";
+import { useGetEvaluationMetricsQuery } from "@/common/api/endpoints/evaluation.api";
 
 export function EvaluationDashboard() {
   const enabled = useFeatureFlag("EVALUATION_DASHBOARD_ENABLED");
-  const { metrics, error, loading, load } = useEvaluationMetrics(enabled);
-
-  // ✅ Effect only triggers the load function when enabled changes
-  useEffect(() => {
-    if (enabled) {
-      load();
-    }
-  }, [enabled, load]);
+  const {
+    data: metrics,
+    error,
+    isLoading,
+    refetch,
+  } = useGetEvaluationMetricsQuery();
 
   if (!enabled) return null;
-  if (error) return <ErrorState message={error} onRetry={load} />;
-  if (loading || !metrics) {
+  if (error) {
+    return (
+      <ErrorState
+        title="Failed to load report"
+        error={error}
+        onRetry={refetch}
+      />
+    );
+  }
+
+  if (isLoading || !metrics) {
     return <Skeleton className="h-48 w-full rounded-xl" />;
   }
 
@@ -82,4 +93,3 @@ export function EvaluationDashboard() {
     </section>
   );
 }
-
