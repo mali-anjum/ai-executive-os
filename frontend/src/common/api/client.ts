@@ -179,22 +179,22 @@ export async function seedDemoTenant(): Promise<DemoSeedResponse> {
 //   return parseJson<EvaluationMetrics>(res);
 // }
 
-export async function runEvaluationHarness(): Promise<HarnessRunResponse> {
-  const res = await authFetch(`${API_BASE}/evaluation/harness/run`, {
-    method: "POST",
-  });
-  return parseJson<HarnessRunResponse>(res);
-}
+// export async function runEvaluationHarness(): Promise<HarnessRunResponse> {
+//   const res = await authFetch(`${API_BASE}/evaluation/harness/run`, {
+//     method: "POST",
+//   });
+//   return parseJson<HarnessRunResponse>(res);
+// }
 
-export async function saveIntegrationConfig(
-  provider: string,
-  config: Record<string, string>
-): Promise<void> {
-  await authFetch(`${API_BASE}/settings/integrations`, {
-    method: "PUT",
-    body: JSON.stringify({ provider, config }),
-  });
-}
+// export async function saveIntegrationConfig(
+//   provider: string,
+//   config: Record<string, string>
+// ): Promise<void> {
+//   await authFetch(`${API_BASE}/settings/integrations`, {
+//     method: "PUT",
+//     body: JSON.stringify({ provider, config }),
+//   });
+// }
 
 export async function syncNotionPage(
   pageId: string,

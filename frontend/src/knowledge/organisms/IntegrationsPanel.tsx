@@ -1,108 +1,57 @@
+// common/organisms/integrations/IntegrationsPanel.tsx
 "use client";
 
-import { useState } from "react";
-import { Button } from "@/common/atoms/ui/button";
-import { Input } from "@/common/atoms/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/common/atoms/ui/card";
 import {
-  saveIntegrationConfig,
-  resyncAllConnectors,
-  syncGoogleDriveFile,
-  syncNotionPage,
-} from "@/common/api/client";
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/common/atoms/ui/card";
 import { DepartmentPresetPicker } from "@/knowledge/molecules/DepartmentPresetPicker";
+import { IntegrationInput } from "@/knowledge/atoms/IntegrationInput";
+import { IntegrationButton } from "@/knowledge/atoms/IntegrationButton";
+import { IntegrationMessage } from "@/knowledge/atoms/IntegrationMessage";
+import { SettingsFields } from "@/knowledge/molecules/SettingsFields";
+import { ConnectorFields } from "@/knowledge/molecules/ConnectorFields";
 import { useFeatureFlag } from "@/common/hooks/useFeatureFlag";
+import { useIntegrations } from "@/knowledge/hooks/useIntegration";
 
-export function IntegrationsPanel({ onSynced }: { onSynced?: () => void }) {
+interface IntegrationsPanelProps {
+  onSynced?: () => void;
+}
+
+export function IntegrationsPanel({ onSynced }: IntegrationsPanelProps) {
   const connectors = useFeatureFlag("CONNECTOR_SYNC_ENABLED");
   const settings = useFeatureFlag("INTEGRATIONS_SETTINGS_ENABLED");
-  const [notionToken, setNotionToken] = useState("");
-  const [driveToken, setDriveToken] = useState("");
-  const [jiraSite, setJiraSite] = useState("");
-  const [jiraEmail, setJiraEmail] = useState("");
-  const [jiraToken, setJiraToken] = useState("");
-  const [jiraProject, setJiraProject] = useState("OPS");
-  const [notionPageId, setNotionPageId] = useState("");
-  const [driveFileId, setDriveFileId] = useState("");
-  const [deptScope, setDeptScope] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  
+  const {
+    notionToken,
+    driveToken,
+    jiraSite,
+    jiraEmail,
+    jiraToken,
+    jiraProject,
+    notionPageId,
+    driveFileId,
+    deptScope,
+    message,
+    busy,
+    setNotionToken,
+    setDriveToken,
+    setJiraSite,
+    setJiraEmail,
+    setJiraToken,
+    setJiraProject,
+    setNotionPageId,
+    setDriveFileId,
+    setDeptScope,
+    saveConfigs,
+    runNotionSync,
+    runDriveSync,
+    runResyncAll,
+  } = useIntegrations({ onSynced });
 
   if (!connectors && !settings) return null;
-
-  const deptList = deptScope
-    ? deptScope.split(",").map((d) => d.trim()).filter(Boolean)
-    : undefined;
-
-  const saveConfigs = async () => {
-    setBusy(true);
-    setMessage(null);
-    try {
-      if (notionToken) {
-        await saveIntegrationConfig("notion", { api_token: notionToken });
-      }
-      if (driveToken) {
-        await saveIntegrationConfig("google_drive", { access_token: driveToken });
-      }
-      if (jiraSite && jiraEmail && jiraToken) {
-        await saveIntegrationConfig("jira", {
-          site_url: jiraSite,
-          email: jiraEmail,
-          api_token: jiraToken,
-          project_key: jiraProject,
-        });
-      }
-      setMessage("Integration credentials saved.");
-    } catch (e) {
-      setMessage(e instanceof Error ? e.message : "Save failed");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const runNotionSync = async () => {
-    if (!notionPageId) return;
-    setBusy(true);
-    setMessage(null);
-    try {
-      await syncNotionPage(notionPageId, { allowedDepartments: deptList });
-      setMessage("Notion page queued for indexing.");
-      onSynced?.();
-    } catch (e) {
-      setMessage(e instanceof Error ? e.message : "Notion sync failed");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const runResyncAll = async () => {
-    setBusy(true);
-    setMessage(null);
-    try {
-      await resyncAllConnectors();
-      setMessage("All connectors queued for re-sync.");
-      onSynced?.();
-    } catch (e) {
-      setMessage(e instanceof Error ? e.message : "Re-sync failed");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const runDriveSync = async () => {
-    if (!driveFileId) return;
-    setBusy(true);
-    setMessage(null);
-    try {
-      await syncGoogleDriveFile(driveFileId, { allowedDepartments: deptList });
-      setMessage("Google Drive file queued for indexing.");
-      onSynced?.();
-    } catch (e) {
-      setMessage(e instanceof Error ? e.message : "Drive sync failed");
-    } finally {
-      setBusy(false);
-    }
-  };
 
   return (
     <Card>
@@ -113,91 +62,88 @@ export function IntegrationsPanel({ onSynced }: { onSynced?: () => void }) {
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Department Scope */}
         <div>
           <p className="mb-2 text-xs font-medium text-muted-foreground">
             Department scope for synced docs (optional)
           </p>
           <DepartmentPresetPicker value={deptScope} onChange={setDeptScope} />
         </div>
-        <Input
+        
+        <IntegrationInput
           label="Custom departments (comma-separated)"
           value={deptScope}
-          onChange={(e) => setDeptScope(e.target.value)}
+          onChange={setDeptScope}
           placeholder="hr, engineering"
         />
-        {settings ? (
-          <div className="grid gap-3 md:grid-cols-2">
-            <Input
-              label="Notion API token"
-              type="password"
-              value={notionToken}
-              onChange={(e) => setNotionToken(e.target.value)}
-            />
-            <Input
-              label="Google Drive access token"
-              type="password"
-              value={driveToken}
-              onChange={(e) => setDriveToken(e.target.value)}
-            />
-            <Input
-              label="Jira site URL"
-              value={jiraSite}
-              onChange={(e) => setJiraSite(e.target.value)}
-              placeholder="https://yourorg.atlassian.net"
-            />
-            <Input
-              label="Jira email"
-              value={jiraEmail}
-              onChange={(e) => setJiraEmail(e.target.value)}
-            />
-            <Input
-              label="Jira API token"
-              type="password"
-              value={jiraToken}
-              onChange={(e) => setJiraToken(e.target.value)}
-            />
-            <Input
-              label="Jira project key"
-              value={jiraProject}
-              onChange={(e) => setJiraProject(e.target.value)}
-            />
-          </div>
-        ) : null}
-        {connectors ? (
-          <div className="grid gap-3 md:grid-cols-2">
-            <Input
-              label="Notion page ID"
-              value={notionPageId}
-              onChange={(e) => setNotionPageId(e.target.value)}
-            />
-            <Input
-              label="Google Drive file ID"
-              value={driveFileId}
-              onChange={(e) => setDriveFileId(e.target.value)}
-            />
-          </div>
-        ) : null}
+
+        {/* Settings Fields */}
+        {settings && (
+          <SettingsFields
+            notionToken={notionToken}
+            driveToken={driveToken}
+            jiraSite={jiraSite}
+            jiraEmail={jiraEmail}
+            jiraToken={jiraToken}
+            jiraProject={jiraProject}
+            onNotionTokenChange={setNotionToken}
+            onDriveTokenChange={setDriveToken}
+            onJiraSiteChange={setJiraSite}
+            onJiraEmailChange={setJiraEmail}
+            onJiraTokenChange={setJiraToken}
+            onJiraProjectChange={setJiraProject}
+          />
+        )}
+
+        {/* Connector Fields */}
+        {connectors && (
+          <ConnectorFields
+            notionPageId={notionPageId}
+            driveFileId={driveFileId}
+            onNotionPageIdChange={setNotionPageId}
+            onDriveFileIdChange={setDriveFileId}
+          />
+        )}
+
+        {/* Buttons */}
         <div className="flex flex-wrap gap-2">
-          {settings ? (
-            <Button disabled={busy} onClick={() => void saveConfigs()}>
+          {settings && (
+            <IntegrationButton
+              disabled={busy}
+              onClick={saveConfigs}
+            >
               Save credentials
-            </Button>
-          ) : null}
-          {connectors ? (
+            </IntegrationButton>
+          )}
+          
+          {connectors && (
             <>
-              <Button variant="secondary" disabled={busy} onClick={() => void runNotionSync()}>
+              <IntegrationButton
+                variant="secondary"
+                disabled={busy}
+                onClick={runNotionSync}
+              >
                 Sync Notion
-              </Button>
-              <Button variant="secondary" disabled={busy} onClick={() => void runDriveSync()}>
+              </IntegrationButton>
+              <IntegrationButton
+                variant="secondary"
+                disabled={busy}
+                onClick={runDriveSync}
+              >
                 Sync Drive
-              </Button>
-              <Button variant="ghost" disabled={busy} onClick={() => void runResyncAll()}>
+              </IntegrationButton>
+              <IntegrationButton
+                variant="ghost"
+                disabled={busy}
+                onClick={runResyncAll}
+              >
                 Re-sync all
-              </Button>
+              </IntegrationButton>
             </>
-          ) : null}
+          )}
         </div>
-        {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
+
+        <IntegrationMessage message={message} />
       </CardContent>
     </Card>
   );
