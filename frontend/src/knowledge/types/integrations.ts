@@ -1,18 +1,10 @@
-import { z } from "zod";
+import z from "zod";
 
 export const integrationSchema = z.object({
-  notionToken: z.string().optional(),
-  driveToken: z.string().optional(),
-  jiraSite: z.string().optional(),
-  jiraEmail: z.string().optional(),
-  jiraToken: z.string().optional(),
-  jiraProject: z.string(),
-  notionPageId: z.string().optional(),
-  driveFileId: z.string().optional(),
-  deptScope: z.string().optional(),
-});
+  notionToken: z.string(),
 
-export const validationSchema = integrationSchema.extend({
+  driveToken: z.string(),
+
   jiraSite: z.union([
     z.literal(""),
     z.url({
@@ -26,7 +18,17 @@ export const validationSchema = integrationSchema.extend({
       message: "Invalid email format",
     }),
   ]),
+
+  jiraToken: z.string(),
+
+  jiraProject: z.string(),
+
+  notionPageId: z.string(),
+
+  driveFileId: z.string(),
+
+  deptScope: z.string(),
 });
 
 export type IntegrationFormData =
-    z.infer<typeof validationSchema>;
+    z.infer<typeof integrationSchema>;

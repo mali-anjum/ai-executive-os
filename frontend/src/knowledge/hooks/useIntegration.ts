@@ -2,14 +2,13 @@
 import { useState, useCallback } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import {
   useSyncNotionPageMutation,
   useSyncGoogleDriveFileMutation,
   useResyncAllConnectorsMutation,
 } from '@/common/api/endpoints/connectors.api';
 import { useSaveIntegrationConfigMutation } from '@/common/api/endpoints/settings.api';
-import { validationSchema, type IntegrationFormData } from '@/knowledge/types/integrations';
+import { integrationSchema, type IntegrationFormData } from '@/knowledge/types/integrations';
 
 interface UseIntegrationsProps {
   onSynced?: () => void;
@@ -17,7 +16,7 @@ interface UseIntegrationsProps {
 
 export function useIntegrations({ onSynced }: UseIntegrationsProps = {}) {
   const form = useForm<IntegrationFormData>({
-    resolver: zodResolver(validationSchema),
+    resolver: zodResolver(integrationSchema),
     defaultValues: {
       notionToken: "",
       driveToken: "",
