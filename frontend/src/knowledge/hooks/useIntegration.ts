@@ -1,26 +1,46 @@
 // common/hooks/useIntegrations.ts
 import { useState, useCallback } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import {
   useSyncNotionPageMutation,
   useSyncGoogleDriveFileMutation,
   useResyncAllConnectorsMutation,
 } from '@/common/api/endpoints/connectors.api';
 import { useSaveIntegrationConfigMutation } from '@/common/api/endpoints/settings.api';
+import { IntegrationFormData } from '@/knowledge/types/integrations';
+// FIX: Make all fields required with defaults
+
+// Add validation rules separately
+const validationSchema = IntegrationFormData.extend({
+  jiraSite: z.string().url('Invalid Jira URL').or(z.literal('')),
+  jiraEmail: z.string().email('Invalid email format').or(z.literal('')),
+});
+
+type IntegrationFormData = z.infer<typeof validationSchema>;
 
 interface UseIntegrationsProps {
   onSynced?: () => void;
 }
 
 export function useIntegrations({ onSynced }: UseIntegrationsProps = {}) {
-  const [notionToken, setNotionToken] = useState("");
-  const [driveToken, setDriveToken] = useState("");
-  const [jiraSite, setJiraSite] = useState("");
-  const [jiraEmail, setJiraEmail] = useState("");
-  const [jiraToken, setJiraToken] = useState("");
-  const [jiraProject, setJiraProject] = useState("OPS");
-  const [notionPageId, setNotionPageId] = useState("");
-  const [driveFileId, setDriveFileId] = useState("");
-  const [deptScope, setDeptScope] = useState("");
+  const form = useForm<IntegrationFormData>({
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
+      notionToken: "",
+      driveToken: "",
+      jiraSite: "",
+      jiraEmail: "",
+      jiraToken: "",
+      jiraProject: "OPS",
+      notionPageId: "",
+      driveFileId: "",
+      deptScope: "",
+    },
+    mode: 'onChange',
+  });
+
   const [message, setMessage] = useState<string | null>(null);
 
   const [saveIntegrationConfig, { isLoading: isSavingIntegration }] = 
@@ -36,39 +56,40 @@ export function useIntegrations({ onSynced }: UseIntegrationsProps = {}) {
     useResyncAllConnectorsMutation();
 
   const busy = isSavingIntegration || isSyncingNotion || isSyncingDrive || isResyncingAll;
+  const formValues = form.watch();
 
-  const getDeptList = useCallback(() => {
+  const getDeptList = useCallback((deptScope: string) => {
     return deptScope
       ? deptScope
           .split(",")
           .map((d) => d.trim())
           .filter(Boolean)
       : undefined;
-  }, [deptScope]);
+  }, []);
 
-  const saveConfigs = useCallback(async () => {
+  const saveConfigs = useCallback(async (data: IntegrationFormData) => {
     setMessage(null);
     try {
-      if (notionToken) {
+      if (data.notionToken) {
         await saveIntegrationConfig({
           provider: "notion",
-          config: { api_token: notionToken },
+          config: { api_token: data.notionToken },
         }).unwrap();
       }
-      if (driveToken) {
+      if (data.driveToken) {
         await saveIntegrationConfig({
           provider: "google_drive",
-          config: { api_token: driveToken },
+          config: { api_token: data.driveToken },
         }).unwrap();
       }
-      if (jiraSite && jiraEmail && jiraToken) {
+      if (data.jiraSite && data.jiraEmail && data.jiraToken) {
         await saveIntegrationConfig({
           provider: "jira",
           config: {
-            site_url: jiraSite,
-            email: jiraEmail,
-            api_token: jiraToken,
-            project_key: jiraProject,
+            site_url: data.jiraSite,
+            email: data.jiraEmail,
+            api_token: data.jiraToken,
+            project_key: data.jiraProject || "OPS",
           },
         }).unwrap();
       }
@@ -76,45 +97,37 @@ export function useIntegrations({ onSynced }: UseIntegrationsProps = {}) {
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "Save failed");
     }
-  }, [
-    notionToken,
-    driveToken,
-    jiraSite,
-    jiraEmail,
-    jiraToken,
-    jiraProject,
-    saveIntegrationConfig,
-  ]);
+  }, [saveIntegrationConfig]);
 
-  const runNotionSync = useCallback(async () => {
-    if (!notionPageId) return;
+  const runNotionSync = useCallback(async (data: IntegrationFormData) => {
+    if (!data.notionPageId) return;
     setMessage(null);
     try {
       await syncNotionPage({
-        pageId: notionPageId,
-        allowedDepartments: getDeptList(),
+        pageId: data.notionPageId,
+        allowedDepartments: getDeptList(data.deptScope || ''),
       }).unwrap();
       setMessage("Notion page queued for indexing.");
       onSynced?.();
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "Notion sync failed");
     }
-  }, [notionPageId, getDeptList, syncNotionPage, onSynced]);
+  }, [syncNotionPage, getDeptList, onSynced]);
 
-  const runDriveSync = useCallback(async () => {
-    if (!driveFileId) return;
+  const runDriveSync = useCallback(async (data: IntegrationFormData) => {
+    if (!data.driveFileId) return;
     setMessage(null);
     try {
       await syncGoogleDriveFile({
-        fileId: driveFileId,
-        allowedDepartments: getDeptList(),
+        fileId: data.driveFileId,
+        allowedDepartments: getDeptList(data.deptScope || ''),
       }).unwrap();
       setMessage("Google Drive file queued for indexing.");
       onSynced?.();
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "Drive sync failed");
     }
-  }, [driveFileId, getDeptList, syncGoogleDriveFile, onSynced]);
+  }, [syncGoogleDriveFile, getDeptList, onSynced]);
 
   const runResyncAll = useCallback(async () => {
     setMessage(null);
@@ -127,36 +140,32 @@ export function useIntegrations({ onSynced }: UseIntegrationsProps = {}) {
     }
   }, [resyncAllConnectors, onSynced]);
 
+  // FIX: Create properly typed handlers
+  const handleSaveConfigs = form.handleSubmit(saveConfigs);
+  const handleNotionSync = form.handleSubmit(runNotionSync);
+  const handleDriveSync = form.handleSubmit(runDriveSync);
+
   return {
-    // State
-    notionToken,
-    driveToken,
-    jiraSite,
-    jiraEmail,
-    jiraToken,
-    jiraProject,
-    notionPageId,
-    driveFileId,
-    deptScope,
+    form,
+    formValues,
     message,
     busy,
-    
-    // Setters
-    setNotionToken,
-    setDriveToken,
-    setJiraSite,
-    setJiraEmail,
-    setJiraToken,
-    setJiraProject,
-    setNotionPageId,
-    setDriveFileId,
-    setDeptScope,
     setMessage,
-    
-    // Actions
-    saveConfigs,
-    runNotionSync,
-    runDriveSync,
+    saveConfigs: handleSaveConfigs,
+    runNotionSync: handleNotionSync,
+    runDriveSync: handleDriveSync,
     runResyncAll,
+    notionToken: form.register('notionToken'),
+    driveToken: form.register('driveToken'),
+    jiraSite: form.register('jiraSite'),
+    jiraEmail: form.register('jiraEmail'),
+    jiraToken: form.register('jiraToken'),
+    jiraProject: form.register('jiraProject'),
+    notionPageId: form.register('notionPageId'),
+    driveFileId: form.register('driveFileId'),
+    deptScope: form.register('deptScope'),
   };
 }
+
+// Export the type for use in other components
+export type { IntegrationFormData };

@@ -25,31 +25,17 @@ export function IntegrationsPanel({ onSynced }: IntegrationsPanelProps) {
   const settings = useFeatureFlag("INTEGRATIONS_SETTINGS_ENABLED");
   
   const {
-    notionToken,
-    driveToken,
-    jiraSite,
-    jiraEmail,
-    jiraToken,
-    jiraProject,
-    notionPageId,
-    driveFileId,
-    deptScope,
+    form,
+    formValues,
     message,
     busy,
-    setNotionToken,
-    setDriveToken,
-    setJiraSite,
-    setJiraEmail,
-    setJiraToken,
-    setJiraProject,
-    setNotionPageId,
-    setDriveFileId,
-    setDeptScope,
     saveConfigs,
     runNotionSync,
     runDriveSync,
     runResyncAll,
   } = useIntegrations({ onSynced });
+
+  const { errors } = form.formState;
 
   if (!connectors && !settings) return null;
 
@@ -62,86 +48,73 @@ export function IntegrationsPanel({ onSynced }: IntegrationsPanelProps) {
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Department Scope */}
-        <div>
-          <p className="mb-2 text-xs font-medium text-muted-foreground">
-            Department scope for synced docs (optional)
-          </p>
-          <DepartmentPresetPicker value={deptScope} onChange={setDeptScope} />
-        </div>
-        
-        <IntegrationInput
-          label="Custom departments (comma-separated)"
-          value={deptScope}
-          onChange={setDeptScope}
-          placeholder="hr, engineering"
-        />
-
-        {/* Settings Fields */}
-        {settings && (
-          <SettingsFields
-            notionToken={notionToken}
-            driveToken={driveToken}
-            jiraSite={jiraSite}
-            jiraEmail={jiraEmail}
-            jiraToken={jiraToken}
-            jiraProject={jiraProject}
-            onNotionTokenChange={setNotionToken}
-            onDriveTokenChange={setDriveToken}
-            onJiraSiteChange={setJiraSite}
-            onJiraEmailChange={setJiraEmail}
-            onJiraTokenChange={setJiraToken}
-            onJiraProjectChange={setJiraProject}
-          />
-        )}
-
-        {/* Connector Fields */}
-        {connectors && (
-          <ConnectorFields
-            notionPageId={notionPageId}
-            driveFileId={driveFileId}
-            onNotionPageIdChange={setNotionPageId}
-            onDriveFileIdChange={setDriveFileId}
-          />
-        )}
-
-        {/* Buttons */}
-        <div className="flex flex-wrap gap-2">
-          {settings && (
-            <IntegrationButton
-              disabled={busy}
-              onClick={saveConfigs}
-            >
-              Save credentials
-            </IntegrationButton>
-          )}
+        <form onSubmit={(e) => e.preventDefault()}>
+          {/* Department Scope */}
+          <div>
+            <p className="mb-2 text-xs font-medium text-muted-foreground">
+              Department scope for synced docs (optional)
+            </p>
+            <DepartmentPresetPicker 
+              value={formValues.deptScope || ''} 
+              onChange={(value) => form.setValue('deptScope', value)} 
+            />
+          </div>
           
-          {connectors && (
-            <>
-              <IntegrationButton
-                variant="secondary"
-                disabled={busy}
-                onClick={runNotionSync}
-              >
-                Sync Notion
-              </IntegrationButton>
-              <IntegrationButton
-                variant="secondary"
-                disabled={busy}
-                onClick={runDriveSync}
-              >
-                Sync Drive
-              </IntegrationButton>
-              <IntegrationButton
-                variant="ghost"
-                disabled={busy}
-                onClick={runResyncAll}
-              >
-                Re-sync all
-              </IntegrationButton>
-            </>
+          <IntegrationInput
+            label="Custom departments (comma-separated)"
+            register={form.register('deptScope')}
+            placeholder="hr, engineering"
+            error={errors.deptScope?.message}
+          />
+
+          {/* Settings Fields */}
+          {settings && (
+            <SettingsFields form={form} errors={errors} />
           )}
-        </div>
+
+          {/* Connector Fields */}
+          {connectors && (
+            <ConnectorFields form={form} errors={errors} />
+          )}
+
+          {/* Buttons */}
+          <div className="flex flex-wrap gap-2">
+            {settings && (
+              <IntegrationButton
+                disabled={busy}
+                onClick={saveConfigs}
+              >
+                Save credentials
+              </IntegrationButton>
+            )}
+            
+            {connectors && (
+              <>
+                <IntegrationButton
+                  variant="secondary"
+                  disabled={busy}
+                  onClick={runNotionSync}
+                >
+                  Sync Notion
+                </IntegrationButton>
+                <IntegrationButton
+                  variant="secondary"
+                  disabled={busy}
+                  onClick={runDriveSync}
+                >
+                  Sync Drive
+                </IntegrationButton>
+                <IntegrationButton
+                  variant="ghost"
+                  disabled={busy}
+                  onClick={runResyncAll}
+                >
+                  Re-sync all
+                </IntegrationButton>
+              </>
+            )}
+          </div>
+        </form>
 
         <IntegrationMessage message={message} />
       </CardContent>

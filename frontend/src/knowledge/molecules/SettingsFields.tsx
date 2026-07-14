@@ -1,70 +1,51 @@
 // common/molecules/integrations/SettingsFields.tsx
 import { IntegrationInput } from "@/knowledge/atoms/IntegrationInput";
+import { UseFormReturn } from 'react-hook-form';
+import { IntegrationFormData, IntegrationFormErrors } from '@/knowledge/types/integrations';
 
 interface SettingsFieldsProps {
-  notionToken: string;
-  driveToken: string;
-  jiraSite: string;
-  jiraEmail: string;
-  jiraToken: string;
-  jiraProject: string;
-  onNotionTokenChange: (value: string) => void;
-  onDriveTokenChange: (value: string) => void;
-  onJiraSiteChange: (value: string) => void;
-  onJiraEmailChange: (value: string) => void;
-  onJiraTokenChange: (value: string) => void;
-  onJiraProjectChange: (value: string) => void;
+  form: UseFormReturn<IntegrationFormData>;
+  errors: IntegrationFormErrors;
 }
 
-export function SettingsFields({
-  notionToken,
-  driveToken,
-  jiraSite,
-  jiraEmail,
-  jiraToken,
-  jiraProject,
-  onNotionTokenChange,
-  onDriveTokenChange,
-  onJiraSiteChange,
-  onJiraEmailChange,
-  onJiraTokenChange,
-  onJiraProjectChange,
-}: SettingsFieldsProps) {
+export function SettingsFields({ form, errors }: SettingsFieldsProps) {
+  const { register } = form;
+
   return (
     <div className="grid gap-3 md:grid-cols-2">
       <IntegrationInput
         label="Notion API token"
         type="password"
-        value={notionToken}
-        onChange={onNotionTokenChange}
+        register={register('notionToken')}
+        error={errors.notionToken?.message}
       />
       <IntegrationInput
         label="Google Drive access token"
         type="password"
-        value={driveToken}
-        onChange={onDriveTokenChange}
+        register={register('driveToken')}
+        error={errors.driveToken?.message}
       />
       <IntegrationInput
         label="Jira site URL"
-        value={jiraSite}
-        onChange={onJiraSiteChange}
+        register={register('jiraSite')}
         placeholder="https://yourorg.atlassian.net"
+        error={errors.jiraSite?.message}
       />
       <IntegrationInput
         label="Jira email"
-        value={jiraEmail}
-        onChange={onJiraEmailChange}
+        register={register('jiraEmail')}
+        error={errors.jiraEmail?.message}
       />
       <IntegrationInput
         label="Jira API token"
         type="password"
-        value={jiraToken}
-        onChange={onJiraTokenChange}
+        register={register('jiraToken')}
+        error={errors.jiraToken?.message}
       />
       <IntegrationInput
         label="Jira project key"
-        value={jiraProject}
-        onChange={onJiraProjectChange}
+        register={register('jiraProject')}
+        error={errors.jiraProject?.message}
       />
     </div>
   );
