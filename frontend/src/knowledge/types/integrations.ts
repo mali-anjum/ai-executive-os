@@ -12,5 +12,21 @@ export const integrationSchema = z.object({
   deptScope: z.string().optional(),
 });
 
+export const validationSchema = integrationSchema.extend({
+  jiraSite: z.union([
+    z.literal(""),
+    z.url({
+      message: "Invalid Jira URL",
+    }),
+  ]),
+
+  jiraEmail: z.union([
+    z.literal(""),
+    z.email({
+      message: "Invalid email format",
+    }),
+  ]),
+});
+
 export type IntegrationFormData =
-    z.infer<typeof integrationSchema>;
+    z.infer<typeof validationSchema>;

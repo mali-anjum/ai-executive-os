@@ -1,6 +1,6 @@
 // common/hooks/useIntegrations.ts
 import { useState, useCallback } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
@@ -9,16 +9,7 @@ import {
   useResyncAllConnectorsMutation,
 } from '@/common/api/endpoints/connectors.api';
 import { useSaveIntegrationConfigMutation } from '@/common/api/endpoints/settings.api';
-import { IntegrationFormData } from '@/knowledge/types/integrations';
-// FIX: Make all fields required with defaults
-
-// Add validation rules separately
-const validationSchema = IntegrationFormData.extend({
-  jiraSite: z.string().url('Invalid Jira URL').or(z.literal('')),
-  jiraEmail: z.string().email('Invalid email format').or(z.literal('')),
-});
-
-type IntegrationFormData = z.infer<typeof validationSchema>;
+import { validationSchema, type IntegrationFormData } from '@/knowledge/types/integrations';
 
 interface UseIntegrationsProps {
   onSynced?: () => void;
@@ -56,7 +47,9 @@ export function useIntegrations({ onSynced }: UseIntegrationsProps = {}) {
     useResyncAllConnectorsMutation();
 
   const busy = isSavingIntegration || isSyncingNotion || isSyncingDrive || isResyncingAll;
-  const formValues = form.watch();
+  const formValues = useWatch({
+    control: form.control
+  });
 
   const getDeptList = useCallback((deptScope: string) => {
     return deptScope
@@ -140,20 +133,15 @@ export function useIntegrations({ onSynced }: UseIntegrationsProps = {}) {
     }
   }, [resyncAllConnectors, onSynced]);
 
-  // FIX: Create properly typed handlers
-  const handleSaveConfigs = form.handleSubmit(saveConfigs);
-  const handleNotionSync = form.handleSubmit(runNotionSync);
-  const handleDriveSync = form.handleSubmit(runDriveSync);
-
   return {
     form,
     formValues,
     message,
     busy,
     setMessage,
-    saveConfigs: handleSaveConfigs,
-    runNotionSync: handleNotionSync,
-    runDriveSync: handleDriveSync,
+    saveConfigs: form.handleSubmit(saveConfigs),
+    runNotionSync: form.handleSubmit(runNotionSync),
+    runDriveSync: form.handleSubmit(runDriveSync),
     runResyncAll,
     notionToken: form.register('notionToken'),
     driveToken: form.register('driveToken'),
@@ -167,5 +155,4 @@ export function useIntegrations({ onSynced }: UseIntegrationsProps = {}) {
   };
 }
 
-// Export the type for use in other components
 export type { IntegrationFormData };
