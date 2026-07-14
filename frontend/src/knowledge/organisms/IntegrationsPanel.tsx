@@ -1,4 +1,4 @@
-// common/organisms/integrations/IntegrationsPanel.tsx
+// knowledege/organisms/IntegrationsPanel.tsx
 "use client";
 
 import {
@@ -26,7 +26,7 @@ export function IntegrationsPanel({ onSynced }: IntegrationsPanelProps) {
   
   const {
     form,
-    formValues,
+    deptScope,
     message,
     busy,
     saveConfigs,
@@ -55,7 +55,7 @@ export function IntegrationsPanel({ onSynced }: IntegrationsPanelProps) {
               Department scope for synced docs (optional)
             </p>
             <DepartmentPresetPicker 
-              value={formValues.deptScope || ''} 
+              value={deptScope || ''} 
               onChange={(value) => form.setValue('deptScope', value)} 
             />
           </div>

@@ -46,8 +46,9 @@ export function useIntegrations({ onSynced }: UseIntegrationsProps = {}) {
     useResyncAllConnectorsMutation();
 
   const busy = isSavingIntegration || isSyncingNotion || isSyncingDrive || isResyncingAll;
-  const formValues = useWatch({
-    control: form.control
+  const deptScope = useWatch({
+    control: form.control,
+    name: "deptScope",
   });
 
   const getDeptList = useCallback((deptScope: string) => {
@@ -134,7 +135,7 @@ export function useIntegrations({ onSynced }: UseIntegrationsProps = {}) {
 
   return {
     form,
-    formValues,
+    deptScope,
     message,
     busy,
     setMessage,
@@ -142,15 +143,6 @@ export function useIntegrations({ onSynced }: UseIntegrationsProps = {}) {
     runNotionSync: form.handleSubmit(runNotionSync),
     runDriveSync: form.handleSubmit(runDriveSync),
     runResyncAll,
-    notionToken: form.register('notionToken'),
-    driveToken: form.register('driveToken'),
-    jiraSite: form.register('jiraSite'),
-    jiraEmail: form.register('jiraEmail'),
-    jiraToken: form.register('jiraToken'),
-    jiraProject: form.register('jiraProject'),
-    notionPageId: form.register('notionPageId'),
-    driveFileId: form.register('driveFileId'),
-    deptScope: form.register('deptScope'),
   };
 }
 

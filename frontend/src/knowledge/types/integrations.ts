@@ -1,3 +1,4 @@
+import { FieldError } from "react-hook-form";
 import z from "zod";
 
 export const integrationSchema = z.object({
@@ -30,5 +31,8 @@ export const integrationSchema = z.object({
   deptScope: z.string(),
 });
 
-export type IntegrationFormData =
-    z.infer<typeof integrationSchema>;
+export type IntegrationFormData = z.infer<typeof integrationSchema>;
+
+export type IntegrationFormErrors = {
+  [K in keyof IntegrationFormData]?: FieldError;
+};
