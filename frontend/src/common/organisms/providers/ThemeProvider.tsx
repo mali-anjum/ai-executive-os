@@ -1,9 +1,15 @@
 "use client";
 
+import { AppToaster } from "@/common/atoms/ui/sonner";
 import { useTheme } from "@/common/hooks/useTheme";
 
 /** Syncs Redux theme state to `data-theme` on `<html>`. */
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useTheme();
-  return children;
+  return (
+    <>
+      {children}
+      <AppToaster />
+    </>
+  );
 }

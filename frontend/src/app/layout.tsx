@@ -6,7 +6,6 @@ import { ThemeProvider } from "@/common/organisms/providers/ThemeProvider";
 import { AuthProvider } from "@/auth/organisms/AuthProvider";
 import { readThemeScript } from "@/common/lib/theme";
 import "./globals.css";
-import { Providers } from "./providers";
 import { AppToaster } from "@/common/atoms/ui/sonner";
 
 const heading = Plus_Jakarta_Sans({
@@ -23,8 +22,7 @@ const body = DM_Sans({
 
 export const metadata: Metadata = {
   title: "AI Executive OS",
-  description:
-    "AI-powered executive OS — knowledge agent and project routing",
+  description: "AI-powered executive OS — knowledge agent and project routing",
   icons: {
     icon: "/brand/logo-mark.svg",
     apple: "/brand/logo-mark.svg",
@@ -52,7 +50,7 @@ export default function RootLayout({
         <StoreProvider>
           <ThemeProvider>
             <AuthProvider>
-              <Providers>{children}</Providers>
+              {children}
               <AppToaster />
             </AuthProvider>
           </ThemeProvider>
