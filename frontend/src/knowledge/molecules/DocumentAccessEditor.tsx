@@ -7,6 +7,7 @@ import { DepartmentPresetPicker } from "@/knowledge/molecules/DepartmentPresetPi
 import { useUpdateDocumentAccessMutation } from "@/common/api/endpoints/knowledge.api";
 import type { DocumentRecord } from "@/common/types";
 import { parseScope } from "@/knowledge/utils/parseScope";
+import { toast } from "@/common/lib/toast";
 
 function formatScope(values: string[] | null | undefined): string {
   return values?.length ? values.join(", ") : "";
@@ -33,6 +34,7 @@ export function DocumentAccessEditor({
       }).unwrap();
       onSaved?.();
     } catch (error) {
+      console.error("Unable to update document access.", error)
       toast.error("Unable to update document access.");
     }
   };

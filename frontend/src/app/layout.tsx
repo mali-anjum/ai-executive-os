@@ -7,6 +7,7 @@ import { AuthProvider } from "@/auth/organisms/AuthProvider";
 import { readThemeScript } from "@/common/lib/theme";
 import "./globals.css";
 import { Providers } from "./providers";
+import { AppToaster } from "@/common/atoms/ui/sonner";
 
 const heading = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -52,6 +53,7 @@ export default function RootLayout({
           <ThemeProvider>
             <AuthProvider>
               <Providers>{children}</Providers>
+              <AppToaster />
             </AuthProvider>
           </ThemeProvider>
         </StoreProvider>
