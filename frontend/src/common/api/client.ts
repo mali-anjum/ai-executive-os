@@ -196,34 +196,34 @@ export async function seedDemoTenant(): Promise<DemoSeedResponse> {
 //   });
 // }
 
-export async function syncNotionPage(
-  pageId: string,
-  options?: { allowedDepartments?: string[]; allowedRoles?: string[] }
-): Promise<IngestResponse> {
-  const res = await authFetch(`${API_BASE}/connectors/notion/sync`, {
-    method: "POST",
-    body: JSON.stringify({
-      page_id: pageId,
-      allowed_departments: options?.allowedDepartments ?? null,
-      allowed_roles: options?.allowedRoles ?? null,
-    }),
-  });
-  return parseJson<IngestResponse>(res);
-}
+// export async function syncNotionPage(
+//   pageId: string,
+//   options?: { allowedDepartments?: string[]; allowedRoles?: string[] }
+// ): Promise<IngestResponse> {
+//   const res = await authFetch(`${API_BASE}/connectors/notion/sync`, {
+//     method: "POST",
+//     body: JSON.stringify({
+//       page_id: pageId,
+//       allowed_departments: options?.allowedDepartments ?? null,
+//       allowed_roles: options?.allowedRoles ?? null,
+//     }),
+//   });
+//   return parseJson<IngestResponse>(res);
+// }
 
-export async function updateDocumentAccess(
-  documentId: string,
-  access: { allowedDepartments?: string[] | null; allowedRoles?: string[] | null }
-): Promise<DocumentRecord> {
-  const res = await authFetch(`${API_BASE}/documents/${documentId}/access`, {
-    method: "PATCH",
-    body: JSON.stringify({
-      allowed_departments: access.allowedDepartments ?? null,
-      allowed_roles: access.allowedRoles ?? null,
-    }),
-  });
-  return parseJson<DocumentRecord>(res);
-}
+// export async function updateDocumentAccess(
+//   documentId: string,
+//   access: { allowedDepartments?: string[] | null; allowedRoles?: string[] | null }
+// ): Promise<DocumentRecord> {
+//   const res = await authFetch(`${API_BASE}/documents/${documentId}/access`, {
+//     method: "PATCH",
+//     body: JSON.stringify({
+//       allowed_departments: access.allowedDepartments ?? null,
+//       allowed_roles: access.allowedRoles ?? null,
+//     }),
+//   });
+//   return parseJson<DocumentRecord>(res);
+// }
 
 export async function submitQueryFeedback(
   queryLogId: string,

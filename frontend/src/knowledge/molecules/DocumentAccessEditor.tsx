@@ -4,8 +4,9 @@ import { useState } from "react";
 import { Button } from "@/common/atoms/ui/button";
 import { Input } from "@/common/atoms/ui/input";
 import { DepartmentPresetPicker } from "@/knowledge/molecules/DepartmentPresetPicker";
-import { updateDocumentAccess } from "@/common/api/client";
+import { useUpdateDocumentAccessMutation } from "@/common/api/endpoints/knowledge.api";
 import type { DocumentRecord } from "@/common/types";
+import { parseScope } from "@/knowledge/utils/parseScope";
 
 function formatScope(values: string[] | null | undefined): string {
   return values?.length ? values.join(", ") : "";
@@ -20,24 +21,19 @@ export function DocumentAccessEditor({
 }) {
   const [depts, setDepts] = useState(formatScope(document.allowed_departments));
   const [roles, setRoles] = useState(formatScope(document.allowed_roles));
-  const [busy, setBusy] = useState(false);
+  const [updateDocumentAccess, { isLoading }] =
+    useUpdateDocumentAccessMutation();
 
   const save = async () => {
-    setBusy(true);
     try {
-      const allowedDepartments = depts
-        ? depts.split(",").map((d) => d.trim()).filter(Boolean)
-        : null;
-      const allowedRoles = roles
-        ? roles.split(",").map((r) => r.trim()).filter(Boolean)
-        : null;
-      await updateDocumentAccess(document.id, {
-        allowedDepartments: allowedDepartments?.length ? allowedDepartments : null,
-        allowedRoles: allowedRoles?.length ? allowedRoles : null,
-      });
+      await updateDocumentAccess({
+        documentId: document.id,
+        allowedDepartments: parseScope(depts),
+        allowedRoles: parseScope(roles),
+      }).unwrap();
       onSaved?.();
-    } finally {
-      setBusy(false);
+    } catch (error) {
+      toast.error("Unable to update document access.");
     }
   };
 
@@ -61,8 +57,8 @@ export function DocumentAccessEditor({
         onChange={(e) => setRoles(e.target.value)}
         placeholder="Leave empty for all roles"
       />
-      <Button size="sm" disabled={busy} onClick={() => void save()}>
-        {busy ? "Saving…" : "Save access"}
+      <Button size="sm" disabled={isLoading} onClick={() => void save()}>
+        {isLoading ? "Saving…" : "Save access"}
       </Button>
     </div>
   );
