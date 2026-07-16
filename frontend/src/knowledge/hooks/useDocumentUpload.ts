@@ -4,7 +4,7 @@ import { useCallback, useRef } from "react";
 import { documentsPolling } from "@/common/config/polling.config";
 import { useVisibilityPolling } from "@/common/hooks/useVisibilityPolling";
 import { isApiUnreachableError } from "@/common/api/fetch";
-import { listDocuments, uploadDocument } from "@/common/api/client";
+import { useLazyListDocumentsQuery, useUploadDocumentMutation } from "@/common/api/endpoints/knowledge.api";
 import { isDocumentProcessing, type DocumentRecord } from "@/common/types";
 import { useAppDispatch, useAppSelector } from "@/common/store/hooks";
 import {
@@ -31,6 +31,9 @@ export function useDocumentUpload() {
   const lastFingerprint = useRef("");
   const showLoadingOnNextRefresh = useRef(true);
 
+  const [listDocuments] = useLazyListDocumentsQuery();
+  const [uploadDocument] = useUploadDocumentMutation();
+  
   const refresh = useCallback(
     async (options?: { background?: boolean }) => {
       const background = options?.background ?? false;
@@ -39,7 +42,7 @@ export function useDocumentUpload() {
         dispatch(setDocumentsLoading(true));
       }
       try {
-        const docs = await listDocuments();
+        const docs = await listDocuments().unwrap();
         const fp = documentsFingerprint(docs);
         if (fp !== lastFingerprint.current) {
           lastFingerprint.current = fp;
@@ -61,7 +64,7 @@ export function useDocumentUpload() {
         dispatch(finishDocumentsLoading());
       }
     },
-    [dispatch]
+    [dispatch, listDocuments]
   );
 
   const hasProcessing = documents.some((d) => isDocumentProcessing(d.status));
@@ -90,7 +93,11 @@ export function useDocumentUpload() {
       dispatch(setUploading(true));
       dispatch(clearDocumentsFetchError());
       try {
-        await uploadDocument(file, options);
+        await uploadDocument({
+          file, 
+          allowedDepartments: options?.allowedDepartments,
+          allowedRoles: options?.allowedRoles,
+        }).unwrap();
         await refresh({ background: true });
       } catch (e) {
         dispatch(
@@ -100,7 +107,7 @@ export function useDocumentUpload() {
         dispatch(setUploading(false));
       }
     },
-    [dispatch, refresh]
+    [dispatch, uploadDocument, refresh]
   );
 
   return {

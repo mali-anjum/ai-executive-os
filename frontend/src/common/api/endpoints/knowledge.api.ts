@@ -113,6 +113,7 @@ export const knowledgeApi = baseApi.injectEndpoints({
 
 export const {
   useListDocumentsQuery,
+  useLazyListDocumentsQuery,
   useUploadDocumentMutation,
   useDeleteDocumentMutation,
   useUpdateDocumentAccessMutation,
