@@ -9,23 +9,23 @@ import {
   useUploadDocumentMutation, 
 } from "@/common/api/endpoints/knowledge.api";
 import { type UploadDocumentRequest } from "@/common/types/knowledge";
-import { isDocumentProcessing, type DocumentRecord } from "@/common/types";
+import { isDocumentProcessing} from "@/common/types";
 import { useAppDispatch, useAppSelector } from "@/common/store/hooks";
 import {
   clearDocumentsFetchError,
-  finishDocumentsLoading,
   setDocuments,
   setDocumentsFetchError,
   setDocumentsLoading,
   setUploadError,
   setUploading,
 } from "@/knowledge/state/knowledgeSlice";
+import { documentsFingerprint } from "@/knowledge/utils/document";
 import { getApiErrorMessage } from "@/common/api/errorMessage";
+import { toast } from "@/common/lib/toast";
 
-
-function documentsFingerprint(docs: readonly DocumentRecord[]): string {
-  return docs.map((d) => `${d.id}:${d.status}`).join("|");
-}
+type RefreshOptions = {
+  background?: boolean;
+};
 
 export function useDocumentUpload() {
   const dispatch = useAppDispatch();
@@ -41,7 +41,7 @@ export function useDocumentUpload() {
   const [uploadDocument] = useUploadDocumentMutation();
 
   const refresh = useCallback(
-    async (options?: { background?: boolean }) => {
+    async (options?: RefreshOptions) => {
       const background = options?.background ?? false;
       if (!background && hasShownInitialLoading.current) {
         hasShownInitialLoading.current = false;
@@ -65,7 +65,7 @@ export function useDocumentUpload() {
           }),
         );
       } finally {
-        dispatch(finishDocumentsLoading());
+        dispatch(setDocumentsLoading(false));
       }
     },
     [dispatch, listDocuments],
@@ -91,20 +91,26 @@ export function useDocumentUpload() {
 
   const upload = useCallback(
     async (request: UploadDocumentRequest) => {
+      if (isUploading) {
+        toast.info("A document upload is already in progress.");
+        return;
+      }
+  
       dispatch(setUploading(true));
       dispatch(clearDocumentsFetchError());
+  
       try {
         await uploadDocument(request).unwrap();
         await refresh({ background: true });
       } catch (e) {
         dispatch(
-          setUploadError(e instanceof Error ? e.message : "Upload failed"),
+          setUploadError(getApiErrorMessage(e))
         );
       } finally {
         dispatch(setUploading(false));
       }
     },
-    [dispatch, uploadDocument, refresh],
+    [dispatch, isUploading, refresh, uploadDocument],
   );
 
   return {
