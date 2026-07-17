@@ -20,6 +20,7 @@ import {
   setUploadError,
   setUploading,
 } from "@/knowledge/state/knowledgeSlice";
+import { getApiErrorMessage } from "@/common/api/errorMessage";
 
 
 function documentsFingerprint(docs: readonly DocumentRecord[]): string {
@@ -57,11 +58,9 @@ export function useDocumentUpload() {
           dispatch(clearDocumentsFetchError());
         }
       } catch (e) {
-        const message =
-          e instanceof Error ? e.message : "Failed to load documents";
         dispatch(
           setDocumentsFetchError({
-            error: message,
+            error: getApiErrorMessage(e) ?? "Failed to load documents",
             apiUnreachable: isApiUnreachableError(e),
           }),
         );
