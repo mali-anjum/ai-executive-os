@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/common/atoms/ui/card";
 import { DepartmentPresetPicker } from "@/knowledge/molecules/DepartmentPresetPicker";
 import { useFeatureFlag } from "@/common/hooks/useFeatureFlag";
 import { cn } from "@/common/lib/utils";
-import { type UploadDocumentRequest } from "@/common/api/endpoints/knowledge.api";
+import { type UploadDocumentRequest } from "@/common/types/knowledge";
 
 type FileUploadCardProps = {
   onUpload: (request: UploadDocumentRequest) => Promise<void>;

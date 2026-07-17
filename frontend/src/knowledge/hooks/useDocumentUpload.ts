@@ -7,8 +7,8 @@ import { isApiUnreachableError } from "@/common/api/fetch";
 import {
   useLazyListDocumentsQuery,
   useUploadDocumentMutation, 
-  type UploadDocumentRequest
 } from "@/common/api/endpoints/knowledge.api";
+import { type UploadDocumentRequest } from "@/common/types/knowledge";
 import { isDocumentProcessing, type DocumentRecord } from "@/common/types";
 import { useAppDispatch, useAppSelector } from "@/common/store/hooks";
 import {
@@ -48,7 +48,8 @@ export function useDocumentUpload() {
       }
       try {
         const docs = await listDocuments().unwrap();
-        const fp = documentsFingerprint(docs);
+        // Avoid dispatching Redux updates when document state hasn't changed.
+        const fp = documentsFingerprint(docs); 
         if (fp !== lastFingerprint.current) {
           lastFingerprint.current = fp;
           dispatch(setDocuments(docs));

@@ -5,15 +5,7 @@ import type {
   IngestResponse,
   QueryResponse,
 } from '@/common/types';
-
-export type UploadDocumentOptions = {
-  allowedDepartments?: string;
-  allowedRoles?: string;
-};
-
-export type UploadDocumentRequest = UploadDocumentOptions & {
-  file: File;
-};
+import type { UploadDocumentRequest } from '@/common/types/knowledge';
 
 export const knowledgeApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
