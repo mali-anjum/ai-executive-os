@@ -4,7 +4,11 @@ import { useCallback, useRef } from "react";
 import { documentsPolling } from "@/common/config/polling.config";
 import { useVisibilityPolling } from "@/common/hooks/useVisibilityPolling";
 import { isApiUnreachableError } from "@/common/api/fetch";
-import { useLazyListDocumentsQuery, useUploadDocumentMutation } from "@/common/api/endpoints/knowledge.api";
+import {
+  useLazyListDocumentsQuery,
+  useUploadDocumentMutation, 
+  type UploadDocumentRequest
+} from "@/common/api/endpoints/knowledge.api";
 import { isDocumentProcessing, type DocumentRecord } from "@/common/types";
 import { useAppDispatch, useAppSelector } from "@/common/store/hooks";
 import {
@@ -16,6 +20,7 @@ import {
   setUploadError,
   setUploading,
 } from "@/knowledge/state/knowledgeSlice";
+
 
 function documentsFingerprint(docs: DocumentRecord[]): string {
   return docs.map((d) => `${d.id}:${d.status}`).join("|");
@@ -33,7 +38,7 @@ export function useDocumentUpload() {
 
   const [listDocuments] = useLazyListDocumentsQuery();
   const [uploadDocument] = useUploadDocumentMutation();
-  
+
   const refresh = useCallback(
     async (options?: { background?: boolean }) => {
       const background = options?.background ?? false;
@@ -49,7 +54,6 @@ export function useDocumentUpload() {
           dispatch(setDocuments(docs));
         } else {
           dispatch(clearDocumentsFetchError());
-          dispatch(finishDocumentsLoading());
         }
       } catch (e) {
         const message =
@@ -58,13 +62,13 @@ export function useDocumentUpload() {
           setDocumentsFetchError({
             error: message,
             apiUnreachable: isApiUnreachableError(e),
-          })
+          }),
         );
       } finally {
         dispatch(finishDocumentsLoading());
       }
     },
-    [dispatch, listDocuments]
+    [dispatch, listDocuments],
   );
 
   const hasProcessing = documents.some((d) => isDocumentProcessing(d.status));
@@ -86,28 +90,21 @@ export function useDocumentUpload() {
   });
 
   const upload = useCallback(
-    async (
-      file: File,
-      options?: { allowedDepartments?: string; allowedRoles?: string }
-    ) => {
+    async (request: UploadDocumentRequest) => {
       dispatch(setUploading(true));
       dispatch(clearDocumentsFetchError());
       try {
-        await uploadDocument({
-          file, 
-          allowedDepartments: options?.allowedDepartments,
-          allowedRoles: options?.allowedRoles,
-        }).unwrap();
+        await uploadDocument(request).unwrap();
         await refresh({ background: true });
       } catch (e) {
         dispatch(
-          setUploadError(e instanceof Error ? e.message : "Upload failed")
+          setUploadError(e instanceof Error ? e.message : "Upload failed"),
         );
       } finally {
         dispatch(setUploading(false));
       }
     },
-    [dispatch, uploadDocument, refresh]
+    [dispatch, uploadDocument, refresh],
   );
 
   return {

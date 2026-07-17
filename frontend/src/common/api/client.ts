@@ -53,40 +53,40 @@ async function authFetch(url: string, init?: RequestInit): Promise<Response> {
   return res;
 }
 
-export async function uploadDocument(
-  file: File,
-  options?: { allowedDepartments?: string; allowedRoles?: string }
-): Promise<IngestResponse> {
-  const headers = await getAuthHeaders();
-  delete headers["Content-Type"];
-  const form = new FormData();
-  form.append("file", file);
-  if (options?.allowedDepartments) {
-    form.append("allowed_departments", options.allowedDepartments);
-  }
-  if (options?.allowedRoles) {
-    form.append("allowed_roles", options.allowedRoles);
-  }
-  const res = await fetchWithTimeout(`${API_BASE}/ingest`, {
-    method: "POST",
-    headers,
-    body: form,
-  });
-  if (!res.ok) {
-    const body = await res.text();
-    throw new ApiClientError(
-      apiErrorMessage(res.status, body, "Upload failed"),
-      res.status,
-      parseApiErrorBody(body)
-    );
-  }
-  return parseJson<IngestResponse>(res);
-}
+// export async function uploadDocument(
+//   file: File,
+//   options?: { allowedDepartments?: string; allowedRoles?: string }
+// ): Promise<IngestResponse> {
+//   const headers = await getAuthHeaders();
+//   delete headers["Content-Type"];
+//   const form = new FormData();
+//   form.append("file", file);
+//   if (options?.allowedDepartments) {
+//     form.append("allowed_departments", options.allowedDepartments);
+//   }
+//   if (options?.allowedRoles) {
+//     form.append("allowed_roles", options.allowedRoles);
+//   }
+//   const res = await fetchWithTimeout(`${API_BASE}/ingest`, {
+//     method: "POST",
+//     headers,
+//     body: form,
+//   });
+//   if (!res.ok) {
+//     const body = await res.text();
+//     throw new ApiClientError(
+//       apiErrorMessage(res.status, body, "Upload failed"),
+//       res.status,
+//       parseApiErrorBody(body)
+//     );
+//   }
+//   return parseJson<IngestResponse>(res);
+// }
 
-export async function listDocuments(): Promise<DocumentRecord[]> {
-  const res = await authFetch(`${API_BASE}/documents`, { cache: "no-store" });
-  return parseJson<DocumentRecord[]>(res);
-}
+// export async function listDocuments(): Promise<DocumentRecord[]> {
+//   const res = await authFetch(`${API_BASE}/documents`, { cache: "no-store" });
+//   return parseJson<DocumentRecord[]>(res);
+// }
 
 export async function deleteDocument(documentId: string): Promise<void> {
   const headers = await getAuthHeaders();

@@ -6,6 +6,15 @@ import type {
   QueryResponse,
 } from '@/common/types';
 
+export type UploadDocumentOptions = {
+  allowedDepartments?: string;
+  allowedRoles?: string;
+};
+
+export type UploadDocumentRequest = UploadDocumentOptions & {
+  file: File;
+};
+
 export const knowledgeApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // Document endpoints
@@ -14,11 +23,7 @@ export const knowledgeApi = baseApi.injectEndpoints({
       providesTags: [API_TAGS.DOCUMENTS],
     }),
     
-    uploadDocument: builder.mutation<IngestResponse, { 
-      file: File; 
-      allowedDepartments?: string; 
-      allowedRoles?: string 
-    }>({
+    uploadDocument: builder.mutation<IngestResponse, UploadDocumentRequest>({
       query: ({ file, allowedDepartments, allowedRoles }) => {
         const formData = new FormData();
         formData.append('file', file);
