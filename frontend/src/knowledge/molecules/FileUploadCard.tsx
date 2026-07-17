@@ -8,17 +8,17 @@ import { Card, CardContent } from "@/common/atoms/ui/card";
 import { DepartmentPresetPicker } from "@/knowledge/molecules/DepartmentPresetPicker";
 import { useFeatureFlag } from "@/common/hooks/useFeatureFlag";
 import { cn } from "@/common/lib/utils";
+import { type UploadDocumentRequest } from "@/common/api/endpoints/knowledge.api";
+
+type FileUploadCardProps = {
+  onUpload: (request: UploadDocumentRequest) => Promise<void>;
+  isUploading: boolean;
+}
 
 export function FileUploadCard({
   onUpload,
   isUploading,
-}: {
-  onUpload: (
-    file: File,
-    options?: { allowedDepartments?: string; allowedRoles?: string }
-  ) => void;
-  isUploading: boolean;
-}) {
+}: FileUploadCardProps) {
   const rbacEnabled = useFeatureFlag("DOCUMENT_RBAC_ENABLED");
   const [deptScope, setDeptScope] = useState("");
   const [roleScope, setRoleScope] = useState("");
@@ -26,8 +26,12 @@ export function FileUploadCard({
   const [dragOver, setDragOver] = useState(false);
 
   const handleFiles = (files: FileList | null) => {
-    if (!files?.[0]) return;
-    onUpload(files[0], {
+    const file = files?.[0];
+  
+    if (!file) return;
+  
+    onUpload({
+      file,
       allowedDepartments: deptScope || undefined,
       allowedRoles: roleScope || undefined,
     });
