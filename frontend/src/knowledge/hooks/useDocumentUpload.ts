@@ -22,7 +22,7 @@ import {
 } from "@/knowledge/state/knowledgeSlice";
 
 
-function documentsFingerprint(docs: DocumentRecord[]): string {
+function documentsFingerprint(docs: readonly DocumentRecord[]): string {
   return docs.map((d) => `${d.id}:${d.status}`).join("|");
 }
 
@@ -34,7 +34,7 @@ export function useDocumentUpload() {
   const error = useAppSelector((s) => s.knowledge.error);
   const apiUnreachable = useAppSelector((s) => s.knowledge.apiUnreachable);
   const lastFingerprint = useRef("");
-  const showLoadingOnNextRefresh = useRef(true);
+  const hasShownInitialLoading = useRef(true);
 
   const [listDocuments] = useLazyListDocumentsQuery();
   const [uploadDocument] = useUploadDocumentMutation();
@@ -42,8 +42,8 @@ export function useDocumentUpload() {
   const refresh = useCallback(
     async (options?: { background?: boolean }) => {
       const background = options?.background ?? false;
-      if (!background && showLoadingOnNextRefresh.current) {
-        showLoadingOnNextRefresh.current = false;
+      if (!background && hasShownInitialLoading.current) {
+        hasShownInitialLoading.current = false;
         dispatch(setDocumentsLoading(true));
       }
       try {
@@ -78,7 +78,7 @@ export function useDocumentUpload() {
     enabled: !apiUnreachable,
     onPoll: () => {
       void refresh({
-        background: !showLoadingOnNextRefresh.current,
+        background: !hasShownInitialLoading.current,
       });
     },
     intervalMs: documentsPolling.intervalMs,
