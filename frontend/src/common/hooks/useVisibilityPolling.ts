@@ -3,26 +3,38 @@
 import { useEffect, useRef } from "react";
 
 type UseVisibilityPollingOptions = {
-  /** When false, no polling runs. */
+  /** When false, polling is disabled. */
   enabled: boolean;
+
+  /** Function executed every poll cycle. */
   onPoll: () => void | Promise<void>;
-  /** Steady-state interval while the tab is visible (default 30s). */
+
+  /** Normal polling interval (default: 30s). */
   intervalMs?: number;
-  /** Shorter interval right after mount (default 12s). */
+
+  /** Faster polling immediately after mount. */
   fastIntervalMs?: number;
-  /** How long to use fastIntervalMs after mount (default 2 min). */
+
+  /** Duration to use the fast interval. */
   fastDurationMs?: number;
-  /** Stop polling when the browser tab is hidden (default true). */
+
+  /** Pause polling while browser tab is hidden. */
   pauseWhenHidden?: boolean;
-  /** Dynamic interval; overrides fast/steady when provided. */
+
+  /** Optional dynamic polling interval. */
   getIntervalMs?: () => number;
 };
 
 /**
- * Polls an API only while the tab is visible, with a slower steady interval
- * to reduce server load vs fixed 5s polling.
+ * Visibility-aware polling hook.
  *
- * Intervals: @/common/config/polling.config (ticketsPolling, documentsPolling, …)
+ * Features:
+ * - Initial poll immediately after mount.
+ * - Fast polling immediately after mount.
+ * - Dynamic polling intervals.
+ * - Pauses while browser tab is hidden.
+ * - Prevents overlapping requests.
+ * - Cleans up correctly on unmount.
  */
 export function useVisibilityPolling({
   enabled,
@@ -33,12 +45,18 @@ export function useVisibilityPolling({
   pauseWhenHidden = true,
   getIntervalMs,
 }: UseVisibilityPollingOptions) {
-  // ✅ Move the Date.now() call inside the effect, not during render
-  const mountedAtRef = useRef<number | null>(null);
+  const mountedAtRef = useRef(0);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const onPollRef = useRef(onPoll);
   const getIntervalMsRef = useRef(getIntervalMs);
 
-  // ✅ Update refs in an effect, not during render
+  /** Prevent concurrent requests */
+  const pollingRef = useRef(false);
+
+  /** Prevent scheduling after unmount */
+  const destroyedRef = useRef(false);
+
   useEffect(() => {
     onPollRef.current = onPoll;
     getIntervalMsRef.current = getIntervalMs;
@@ -47,44 +65,89 @@ export function useVisibilityPolling({
   useEffect(() => {
     if (!enabled) return;
 
-    // ✅ Set the mounted time inside the effect
+    destroyedRef.current = false;
     mountedAtRef.current = Date.now();
-    let timer: ReturnType<typeof setTimeout> | null = null;
 
     const resolveInterval = () => {
-      const dynamic = getIntervalMsRef.current;
-      if (dynamic) return dynamic();
-      const elapsed = Date.now() - (mountedAtRef.current || Date.now());
+      const dynamicInterval = getIntervalMsRef.current;
+
+      if (dynamicInterval) return dynamicInterval();
+
+      const elapsed = Date.now() - mountedAtRef.current;
+
       return elapsed < fastDurationMs ? fastIntervalMs : intervalMs;
     };
 
-    const schedule = () => {
-      if (timer) clearTimeout(timer);
-      if (pauseWhenHidden && typeof document !== "undefined" && document.hidden) {
+    const scheduleNextPoll = () => {
+      if (destroyedRef.current) return;
+
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+
+      if (
+        pauseWhenHidden &&
+        typeof document !== "undefined" &&
+        document.hidden
+      ) {
         return;
       }
-      timer = setTimeout(() => {
-        void Promise.resolve(onPollRef.current()).finally(schedule);
+
+      timerRef.current = setTimeout(() => {
+        void executePoll();
       }, resolveInterval());
     };
 
-    const onVisible = () => {
-      void Promise.resolve(onPollRef.current());
-      schedule();
+    const executePoll = async () => {
+      if (destroyedRef.current) return;
+
+      if (pollingRef.current)  return;
+    
+      pollingRef.current = true;
+
+      try {
+        await onPollRef.current();
+      } finally {
+        pollingRef.current = false;
+
+        scheduleNextPoll();
+      }
     };
 
-    // Initial poll
-    void Promise.resolve(onPollRef.current());
-    schedule();
+    const handleVisibilityChange = () => {
+      if (
+        pauseWhenHidden &&
+        typeof document !== "undefined" &&
+        document.hidden
+      ) {
+        return;
+      }
+
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+
+      void executePoll();
+    };
+
+    void executePoll();
 
     if (pauseWhenHidden && typeof document !== "undefined") {
-      document.addEventListener("visibilitychange", onVisible);
+      document.addEventListener("visibilitychange", handleVisibilityChange);
     }
 
     return () => {
-      if (timer) clearTimeout(timer);
+      destroyedRef.current = true;
+
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+
       if (pauseWhenHidden && typeof document !== "undefined") {
-        document.removeEventListener("visibilitychange", onVisible);
+        document.removeEventListener(
+          "visibilitychange",
+          handleVisibilityChange,
+        );
       }
     };
   }, [enabled, intervalMs, fastIntervalMs, fastDurationMs, pauseWhenHidden]);
