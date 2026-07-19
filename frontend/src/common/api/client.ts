@@ -51,43 +51,43 @@ async function authFetch(url: string, init?: RequestInit): Promise<Response> {
   }
   return res;
 }
-export async function deleteDocument(documentId: string): Promise<void> {
-  const headers = await getAuthHeaders();
-  const res = await fetchWithTimeout(`${API_BASE}/documents/${documentId}`, {
-    method: "DELETE",
-    headers,
-  });
-  if (res.status === 404) {
-    return;
-  }
-  if (!res.ok && res.status !== 204) {
-    const body = await res.text();
-    throw new ApiClientError(
-      apiErrorMessage(res.status, body, res.statusText),
-      res.status,
-      parseApiErrorBody(body)
-    );
-  }
-}
+// export async function deleteDocument(documentId: string): Promise<void> {
+//   const headers = await getAuthHeaders();
+//   const res = await fetchWithTimeout(`${API_BASE}/documents/${documentId}`, {
+//     method: "DELETE",
+//     headers,
+//   });
+//   if (res.status === 404) {
+//     return;
+//   }
+//   if (!res.ok && res.status !== 204) {
+//     const body = await res.text();
+//     throw new ApiClientError(
+//       apiErrorMessage(res.status, body, res.statusText),
+//       res.status,
+//       parseApiErrorBody(body)
+//     );
+//   }
+// }
 
-export async function queryKnowledge(
-  query: string,
-  sessionId?: string | null
-): Promise<QueryResponse> {
-  const body: QueryRequest = { query, session_id: sessionId ?? null };
-  const res = await authFetch(`${API_BASE}/query`, {
-    method: "POST",
-    body: JSON.stringify(body),
-  });
-  return parseJson<QueryResponse>(res);
-}
+// export async function queryKnowledge(
+//   query: string,
+//   sessionId?: string | null
+// ): Promise<QueryResponse> {
+//   const body: QueryRequest = { query, session_id: sessionId ?? null };
+//   const res = await authFetch(`${API_BASE}/query`, {
+//     method: "POST",
+//     body: JSON.stringify(body),
+//   });
+//   return parseJson<QueryResponse>(res);
+// }
 
-export async function fetchAnalytics(): Promise<AnalyticsDashboard> {
-  const res = await authFetch(`${API_BASE}/analytics/dashboard`, {
-    cache: "no-store",
-  });
-  return parseJson<AnalyticsDashboard>(res);
-}
+// export async function fetchAnalytics(): Promise<AnalyticsDashboard> {
+//   const res = await authFetch(`${API_BASE}/analytics/dashboard`, {
+//     cache: "no-store",
+//   });
+//   return parseJson<AnalyticsDashboard>(res);
+// }
 
 export async function listTickets(): Promise<TicketRecord[]> {
   const res = await authFetch(`${API_BASE}/tickets`, { cache: "no-store" });

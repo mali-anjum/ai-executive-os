@@ -6,7 +6,7 @@ import { Badge } from "@/common/atoms/Badge";
 import { FileUploadCard } from "@/knowledge/molecules/FileUploadCard";
 import { Button } from "@/common/atoms/ui/button";
 import { Card } from "@/common/atoms/ui/card";
-import { deleteDocument } from "@/common/api/client";
+import { useDeleteDocumentMutation } from "@/common/api/endpoints/knowledge.api";
 import { useDocumentUpload } from "@/knowledge/hooks/useDocumentUpload";
 import { useRole } from "@/common/hooks/useRole";
 import { useFeatureFlag } from "@/common/hooks/useFeatureFlag";
@@ -22,6 +22,7 @@ export function DocumentLibrary() {
   const [editingAccessId, setEditingAccessId] = useState<string | null>(null);
   const { documents, isUploading, error, upload, refresh, isLoading } =
     useDocumentUpload();
+  const [deleteDocument] = useDeleteDocumentMutation();  
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleDelete = async (id: string) => {
