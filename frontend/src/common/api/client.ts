@@ -70,24 +70,7 @@ async function authFetch(url: string, init?: RequestInit): Promise<Response> {
 //   }
 // }
 
-// export async function queryKnowledge(
-//   query: string,
-//   sessionId?: string | null
-// ): Promise<QueryResponse> {
-//   const body: QueryRequest = { query, session_id: sessionId ?? null };
-//   const res = await authFetch(`${API_BASE}/query`, {
-//     method: "POST",
-//     body: JSON.stringify(body),
-//   });
-//   return parseJson<QueryResponse>(res);
-// }
 
-// export async function fetchAnalytics(): Promise<AnalyticsDashboard> {
-//   const res = await authFetch(`${API_BASE}/analytics/dashboard`, {
-//     cache: "no-store",
-//   });
-//   return parseJson<AnalyticsDashboard>(res);
-// }
 
 export async function listTickets(): Promise<TicketRecord[]> {
   const res = await authFetch(`${API_BASE}/tickets`, { cache: "no-store" });
