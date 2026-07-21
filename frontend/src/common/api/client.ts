@@ -72,10 +72,10 @@ async function authFetch(url: string, init?: RequestInit): Promise<Response> {
 
 
 
-export async function listTickets(): Promise<TicketRecord[]> {
-  const res = await authFetch(`${API_BASE}/tickets`, { cache: "no-store" });
-  return parseJson<TicketRecord[]>(res);
-}
+// export async function listTickets(): Promise<TicketRecord[]> {
+//   const res = await authFetch(`${API_BASE}/tickets`, { cache: "no-store" });
+//   return parseJson<TicketRecord[]>(res);
+// }
 
 export async function approveTicket(ticketId: string): Promise<TicketRecord> {
   const res = await authFetch(`${API_BASE}/tickets/${ticketId}/approve`, {
