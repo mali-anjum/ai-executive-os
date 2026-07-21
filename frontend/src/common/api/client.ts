@@ -7,7 +7,6 @@ import {
 import { fetchWithTimeout } from "@/common/api/fetch";
 import type {
   DemoSeedResponse,
-  IngestResponse,
   TicketRecord,
 } from "@/common/types";
 
@@ -91,23 +90,4 @@ export async function submitQueryFeedback(
       parseApiErrorBody(body)
     );
   }
-}
-
-export async function resyncAllConnectors(): Promise<void> {
-  await authFetch(`${API_BASE}/connectors/resync-all`, { method: "POST" });
-}
-
-export async function syncGoogleDriveFile(
-  fileId: string,
-  options?: { allowedDepartments?: string[]; allowedRoles?: string[] }
-): Promise<IngestResponse> {
-  const res = await authFetch(`${API_BASE}/connectors/google-drive/sync`, {
-    method: "POST",
-    body: JSON.stringify({
-      file_id: fileId,
-      allowed_departments: options?.allowedDepartments ?? null,
-      allowed_roles: options?.allowedRoles ?? null,
-    }),
-  });
-  return parseJson<IngestResponse>(res);
 }

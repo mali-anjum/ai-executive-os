@@ -29,7 +29,7 @@ function CitationMarker({
       type="button"
       onClick={onClick}
       className={cn(
-        "ml-1 inline-flex h-[18px] min-w-[18px] items-center justify-center gap-0.5 rounded-full px-1.5 align-baseline text-[10px] font-bold leading-none transition-colors",
+        "ml-1 inline-flex h-4.5 min-w-4.5 items-center justify-center gap-0.5 rounded-full px-1.5 align-baseline text-[10px] font-bold leading-none transition-colors",
         isActive
           ? "bg-accent-ai text-white"
           : "bg-accent-ai/20 text-accent-ai hover:bg-accent-ai/35",
