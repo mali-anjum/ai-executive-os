@@ -6,11 +6,8 @@ import {
 } from "@/common/api/errors";
 import { fetchWithTimeout } from "@/common/api/fetch";
 import type {
-  AnalyticsDashboard,
   DemoSeedResponse,
   IngestResponse,
-  QueryRequest,
-  QueryResponse,
   TicketRecord,
 } from "@/common/types";
 
@@ -51,31 +48,6 @@ async function authFetch(url: string, init?: RequestInit): Promise<Response> {
   }
   return res;
 }
-// export async function deleteDocument(documentId: string): Promise<void> {
-//   const headers = await getAuthHeaders();
-//   const res = await fetchWithTimeout(`${API_BASE}/documents/${documentId}`, {
-//     method: "DELETE",
-//     headers,
-//   });
-//   if (res.status === 404) {
-//     return;
-//   }
-//   if (!res.ok && res.status !== 204) {
-//     const body = await res.text();
-//     throw new ApiClientError(
-//       apiErrorMessage(res.status, body, res.statusText),
-//       res.status,
-//       parseApiErrorBody(body)
-//     );
-//   }
-// }
-
-
-
-// export async function listTickets(): Promise<TicketRecord[]> {
-//   const res = await authFetch(`${API_BASE}/tickets`, { cache: "no-store" });
-//   return parseJson<TicketRecord[]>(res);
-// }
 
 export async function approveTicket(ticketId: string): Promise<TicketRecord> {
   const res = await authFetch(`${API_BASE}/tickets/${ticketId}/approve`, {
