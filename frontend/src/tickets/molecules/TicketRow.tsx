@@ -1,12 +1,17 @@
 "use client";
 
-import { useState } from "react";
 import { Badge } from "@/common/atoms/Badge";
 import { Button } from "@/common/atoms/ui/button";
-import { approveTicket, rejectTicket, type TicketRecord } from "@/common/api/client";
+import {
+  useApproveTicketMutation,
+  useRejectTicketMutation,
+} from "@/common/api/endpoints/tickets.api";
+import { getApiErrorMessage } from "@/common/api/errorMessage";
+import type { TicketRecord } from "@/common/types";
 import { useFeatureFlag } from "@/common/hooks/useFeatureFlag";
 import { useRole } from "@/common/hooks/useRole";
 import { cn } from "@/common/lib/utils";
+import { toast } from "sonner";
 
 const priorityColors: Record<number, string> = {
   1: "bg-muted text-muted-foreground",
@@ -16,16 +21,34 @@ const priorityColors: Record<number, string> = {
   5: "bg-destructive/15 text-destructive",
 };
 
+interface TicketRowProps {
+  ticket: TicketRecord;
+  onUpdated?: () => void;
+}
+
 export function TicketRow({
   ticket,
   onUpdated,
-}: {
-  ticket: TicketRecord;
-  onUpdated?: () => void;
-}) {
+}: TicketRowProps) {
   const approvalEnabled = useFeatureFlag("TICKET_APPROVAL_ENABLED");
   const { isLeadership } = useRole();
-  const [busy, setBusy] = useState(false);
+
+  const [
+    approveTicket,
+    {
+      isLoading: isApproving,
+    },
+  ] = useApproveTicketMutation();
+
+  const [
+    rejectTicket,
+    {
+      isLoading: isRejecting,
+    },
+  ] = useRejectTicketMutation();
+
+  const busy = isApproving || isRejecting;
+
   const priorityClass =
     ticket.priority != null
       ? priorityColors[ticket.priority] ?? "bg-muted text-muted-foreground"
@@ -37,34 +60,46 @@ export function TicketRow({
       ticket.approval_status === "pending_approval" ||
       ticket.status === "pending_approval");
 
-  const handleApprove = async () => {
-    setBusy(true);
-    try {
-      await approveTicket(ticket.id);
-      onUpdated?.();
-    } finally {
-      setBusy(false);
-    }
-  };
+  async function handleApprove() {
+    if (busy) return;
 
-  const handleReject = async () => {
-    setBusy(true);
     try {
-      await rejectTicket(ticket.id);
+      await approveTicket(ticket.id).unwrap();
+
+      toast.success("Ticket approved.");
+
       onUpdated?.();
-    } finally {
-      setBusy(false);
+    } catch (error) {
+      toast.error(getApiErrorMessage(error));
     }
-  };
+  }
+
+  async function handleReject() {
+    if (busy) return;
+
+    try {
+      await rejectTicket(ticket.id).unwrap();
+
+      toast.success("Ticket rejected.");
+
+      onUpdated?.();
+    } catch (error) {
+      toast.error(getApiErrorMessage(error));
+    }
+  }
 
   return (
     <tr className="border-t border-border-subtle transition-colors hover:bg-muted/40">
       <td className="px-4 py-3.5">
-        <p className="font-medium text-foreground">{ticket.summary ?? "—"}</p>
+        <p className="font-medium text-foreground">
+          {ticket.summary ?? "—"}
+        </p>
+
         <p className="mt-0.5 text-xs capitalize text-muted-foreground">
           {ticket.intent?.replace(/_/g, " ") ?? "unknown"}
         </p>
       </td>
+
       <td className="px-4 py-3.5">
         <span
           className={cn(
@@ -75,35 +110,48 @@ export function TicketRow({
           P{ticket.priority ?? "?"}
         </span>
       </td>
+
       <td className="px-4 py-3.5">
         <Badge status={ticket.status} />
       </td>
+
       <td className="px-4 py-3.5 capitalize text-muted-foreground">
         {ticket.source}
       </td>
+
       <td className="px-4 py-3.5 text-muted-foreground">
         {ticket.assignee_email ?? "Unassigned"}
       </td>
+
       <td className="px-4 py-3.5 text-xs text-muted-foreground">
         <div>{new Date(ticket.created_at).toLocaleString()}</div>
-        {ticket.external_ticket_id ? (
-          <div className="mt-1 text-accent-blue">Jira: {ticket.external_ticket_id}</div>
-        ) : null}
-        {approvalEnabled && isLeadership && pending ? (
+
+        {ticket.external_ticket_id && (
+          <div className="mt-1 text-accent-blue">
+            Jira: {ticket.external_ticket_id}
+          </div>
+        )}
+
+        {approvalEnabled && isLeadership && pending && (
           <div className="mt-2 flex gap-2">
-            <Button size="sm" disabled={busy} onClick={() => void handleApprove()}>
-              Approve
+            <Button
+              size="sm"
+              disabled={busy}
+              onClick={() => void handleApprove()}
+            >
+              {isApproving ? "Approving..." : "Approve"}
             </Button>
+
             <Button
               size="sm"
               variant="ghost"
               disabled={busy}
               onClick={() => void handleReject()}
             >
-              Reject
+              {isRejecting ? "Rejecting..." : "Reject"}
             </Button>
           </div>
-        ) : null}
+        )}
       </td>
     </tr>
   );

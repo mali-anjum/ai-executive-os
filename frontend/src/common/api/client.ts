@@ -6,7 +6,6 @@ import {
 } from "@/common/api/errors";
 import { fetchWithTimeout } from "@/common/api/fetch";
 import type {
-  DemoSeedResponse,
   TicketRecord,
 } from "@/common/types";
 
@@ -46,48 +45,4 @@ async function authFetch(url: string, init?: RequestInit): Promise<Response> {
     throw new ApiClientError(message, res.status, parseApiErrorBody(body));
   }
   return res;
-}
-
-export async function approveTicket(ticketId: string): Promise<TicketRecord> {
-  const res = await authFetch(`${API_BASE}/tickets/${ticketId}/approve`, {
-    method: "POST",
-  });
-  return parseJson<TicketRecord>(res);
-}
-
-export async function rejectTicket(ticketId: string): Promise<TicketRecord> {
-  const res = await authFetch(`${API_BASE}/tickets/${ticketId}/reject`, {
-    method: "POST",
-  });
-  return parseJson<TicketRecord>(res);
-}
-
-export async function seedDemoTenant(): Promise<DemoSeedResponse> {
-  const res = await authFetch(`${API_BASE}/demo/seed`, { method: "POST" });
-  return parseJson(res);
-}
-
-
-
-export async function submitQueryFeedback(
-  queryLogId: string,
-  feedback: "positive" | "negative"
-): Promise<void> {
-  const headers = await getAuthHeaders();
-  const res = await fetchWithTimeout(
-    `${API_BASE}/queries/${queryLogId}/feedback`,
-    {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ feedback }),
-    }
-  );
-  if (!res.ok && res.status !== 204) {
-    const body = await res.text();
-    throw new ApiClientError(
-      apiErrorMessage(res.status, body, res.statusText),
-      res.status,
-      parseApiErrorBody(body)
-    );
-  }
 }

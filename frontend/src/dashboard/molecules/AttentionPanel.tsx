@@ -7,6 +7,7 @@ import { Button } from "@/common/atoms/ui/button";
 import { LoadingBlock } from "@/common/molecules/LoadingBlock";
 import { useTickets } from "@/tickets/hooks/useTickets";
 import { useFeatureFlag } from "@/common/hooks/useFeatureFlag";
+import { getApiErrorMessage } from "@/common/api/errorMessage";
 
 export function AttentionPanel() {
   const ticketsEnabled = useFeatureFlag("PROJECT_AGENT_ENABLED");
@@ -42,7 +43,7 @@ export function AttentionPanel() {
             Task routing is disabled. Enable PROJECT_AGENT to see incoming work.
           </p>
         ) : error ? (
-          <p className="text-sm text-destructive">{error}</p>
+          <p className="text-sm text-destructive">{getApiErrorMessage(error)}</p>
         ) : isLoading ? (
           <LoadingBlock rows={2} label="Loading attention items" />
         ) : (
