@@ -6,7 +6,7 @@ import {
   useApproveTicketMutation,
   useRejectTicketMutation,
 } from "@/common/api/endpoints/tickets.api";
-import { getApiErrorMessage } from "@/common/api/errorMessage";
+import { getApiErrorMessage } from "@/common/api/errors/getApiErrorMessage";
 import type { TicketRecord } from "@/common/types";
 import { useFeatureFlag } from "@/common/hooks/useFeatureFlag";
 import { useRole } from "@/common/hooks/useRole";

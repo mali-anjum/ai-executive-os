@@ -14,7 +14,7 @@ import {
 import { useSeedDemoTenantMutation } from "@/common/api/endpoints/demo.api";
 import { useFeatureFlag } from "@/common/hooks/useFeatureFlag";
 import { useRole } from "@/common/hooks/useRole";
-import { getApiErrorMessage } from "@/common/api/errorMessage";
+import { getApiErrorMessage } from "@/common/api/errors/getApiErrorMessage";
 
 export function DemoSeedCard({
   onSeeded,

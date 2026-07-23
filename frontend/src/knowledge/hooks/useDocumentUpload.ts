@@ -5,7 +5,7 @@ import { documentsPolling } from "@/common/config/polling.config";
 import { useVisibilityPolling } from "@/common/hooks/useVisibilityPolling";
 import { isApiUnreachableError } from "@/common/api/fetch";
 import {
-  useLazyListDocumentsQuery,
+  useListDocumentsQuery,
   useUploadDocumentMutation, 
 } from "@/common/api/endpoints/knowledge.api";
 import { type UploadDocumentRequest } from "@/common/types/knowledge";
@@ -20,7 +20,7 @@ import {
   setUploading,
 } from "@/knowledge/state/knowledgeSlice";
 import { documentsFingerprint } from "@/knowledge/utils/document";
-import { getApiErrorMessage } from "@/common/api/errorMessage";
+import { getApiErrorMessage } from "@/common/api/errors/getApiErrorMessage";
 import { toast } from "@/common/lib/toast";
 
 type RefreshOptions = {
@@ -37,7 +37,7 @@ export function useDocumentUpload() {
   const lastFingerprint = useRef("");
   const hasShownInitialLoading = useRef(true);
 
-  const [listDocuments] = useLazyListDocumentsQuery();
+  const { data: listDocuments} = useListDocumentsQuery();
   const [uploadDocument] = useUploadDocumentMutation();
 
   const refresh = useCallback(

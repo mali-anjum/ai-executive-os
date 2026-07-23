@@ -5,7 +5,7 @@ import { analyticsPolling } from "@/common/config/polling.config";
 import { useVisibilityPolling } from "@/common/hooks/useVisibilityPolling";
 import { useFeatureFlag } from "@/common/hooks/useFeatureFlag";
 import { useGetAnalyticsQuery } from "@/common/api/endpoints/dashboard.api";
-import { getApiErrorMessage } from "@/common/api/errorMessage";
+import { getApiErrorMessage } from "@/common/api/errors/getApiErrorMessage";
 
 export function useAnalytics() {
   const enabled = useFeatureFlag("ANALYTICS_DASHBOARD_ENABLED");

@@ -2,7 +2,7 @@
 
 import { useCallback, useRef } from "react";
 import { getAuthHeaders } from "@/auth/services/headers";
-import { apiErrorMessage } from "@/common/api/errors";
+import { apiErrorMessage } from "@/common/api/errors/apiErrorMessage";
 import { fetchWithTimeout } from "@/common/api/fetch";
 import type { QueryResponse } from "@/common/types";
 import { parseStreamSseEvent } from "@/common/types/http/stream-events";

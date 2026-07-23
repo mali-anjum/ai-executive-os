@@ -1,13 +1,10 @@
 import { getAuthHeaders } from "@/auth/services/headers";
 import {
-  ApiClientError,
   apiErrorMessage,
-  parseApiErrorBody,
-} from "@/common/api/errors";
+} from "@/common/api/errors/apiErrorMessage";
 import { fetchWithTimeout } from "@/common/api/fetch";
-import type {
-  TicketRecord,
-} from "@/common/types";
+import { ApiClientError } from "./errors/ApiClientError";
+import { parseApiErrorBody } from "./errors/parseApiErrorBody";
 
 export type {
   AnalyticsDashboard,
@@ -29,11 +26,11 @@ export function documentFileUrl(documentId: string): string {
   return `${API_BASE}/documents/${documentId}/file`;
 }
 
-async function parseJson<T>(res: Response): Promise<T> {
+export async function parseJson<T>(res: Response): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-async function authFetch(url: string, init?: RequestInit): Promise<Response> {
+export async function authFetch(url: string, init?: RequestInit): Promise<Response> {
   const headers = await getAuthHeaders();
   const res = await fetchWithTimeout(url, {
     ...init,

@@ -1,62 +1,77 @@
 import {
-  fetchBaseQuery,
   BaseQueryFn,
   FetchArgs,
   FetchBaseQueryError,
+  fetchBaseQuery,
 } from "@reduxjs/toolkit/query/react";
-import { getAuthHeaders } from "@/auth/services/headers";
-import {
-  ApiClientError,
-  apiErrorMessage,
-  parseApiErrorBody,
-} from "@/common/api/errors";
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
+import { getAuthHeaders } from "@/auth/services/headers";
+import { API_BASE } from "@/common/constants";
+import { apiErrorMessage } from "@/common/api/errors/apiErrorMessage";
+import { parseApiErrorBody } from "@/common/api/errors/parseApiErrorBody";
+
+const rawBaseQuery = fetchBaseQuery({
+  baseUrl: API_BASE,
+});
 
 export const baseQuery: BaseQueryFn<
   string | FetchArgs,
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-  const headers = await getAuthHeaders();
+  const authHeaders = await getAuthHeaders();
 
-  const rawBaseQuery = fetchBaseQuery({
-    baseUrl: API_BASE,
-    prepareHeaders: (headersObj) => {
-      // Add all auth headers
-      Object.entries(headers).forEach(([key, value]) => {
-        headersObj.set(key, value);
-      });
-      return headersObj;
-    },
-  });
-
-  const result = await rawBaseQuery(args, api, extraOptions);
-
-  if (result.error) {
-    const status = result.error.status;
-    let errorMessage = "An error occurred";
-    if ("error" in result.error) {
-      errorMessage = result.error.error;
-    }
-
-    let parsedBody;
-
-    if (typeof status === "number") {
-      try {
-        const response = result.error.data as string;
-        if (response) {
-          parsedBody = parseApiErrorBody(response);
-          errorMessage = apiErrorMessage(status, response, errorMessage);
+  const request =
+    typeof args === "string"
+      ? {
+          url: args,
+          headers: authHeaders,
         }
-      } catch (e) {
-        // If parsing fails, use default error message
-      }
+      : {
+          ...args,
+          headers: {
+            ...authHeaders,
+            ...(args.headers ?? {}),
+          },
+        };
 
-      throw new ApiClientError(errorMessage, status, parsedBody);
-    }
+  const result = await rawBaseQuery(request, api, extraOptions);
+
+  if (!result.error) {
+    return result;
   }
 
-  return result;
+  const { status } = result.error;
+
+  if (typeof status !== "number") {
+    return result;
+  }
+
+  let message = "Request failed.";
+  let parsedBody;
+
+  if (typeof result.error.data === "string") {
+    parsedBody = parseApiErrorBody(result.error.data);
+
+    message = apiErrorMessage(
+      status,
+      result.error.data,
+      message,
+    );
+  } else if (
+    result.error.data &&
+    typeof result.error.data === "object"
+  ) {
+    parsedBody = result.error.data;
+  }
+
+  return {
+    error: {
+      ...result.error,
+      data: {
+        message,
+        body: parsedBody,
+      },
+    },
+  };
 };

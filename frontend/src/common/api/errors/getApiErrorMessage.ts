@@ -1,20 +1,28 @@
 import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import type { SerializedError } from "@reduxjs/toolkit";
+import { ApiClientError } from "./ApiClientError";
+/**
+ * Extracts a user-friendly message from an unknown error.
+ *
+ * Use in the UI layer (React components, hooks, RTK Query mutations,
+ * and catch blocks) to display consistent error messages regardless
+ * of the underlying error type.
+ */
 
 export function getApiErrorMessage(error: unknown): string {
   if (!error) {
     return "Unknown error";
   }
 
+  if (error instanceof ApiClientError) {
+    return error.message;
+  }
+
   if (error instanceof Error) {
     return error.message;
   }
 
-  if (
-    typeof error === "object" &&
-    error !== null &&
-    "message" in error
-  ) {
+  if (typeof error === "object" && error !== null && "message" in error) {
     const serialized = error as SerializedError;
 
     if (serialized.message) {
@@ -22,21 +30,14 @@ export function getApiErrorMessage(error: unknown): string {
     }
   }
 
-  if (
-    typeof error === "object" &&
-    error !== null &&
-    "status" in error
-  ) {
+  if (typeof error === "object" && error !== null && "status" in error) {
     const apiError = error as FetchBaseQueryError;
 
     if (typeof apiError.data === "string") {
       return apiError.data;
     }
 
-    if (
-      typeof apiError.data === "object" &&
-      apiError.data !== null
-    ) {
+    if (typeof apiError.data === "object" && apiError.data !== null) {
       if ("detail" in apiError.data) {
         const detail = apiError.data.detail;
 

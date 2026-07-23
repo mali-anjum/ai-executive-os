@@ -7,7 +7,7 @@ import { Button } from "@/common/atoms/ui/button";
 import { LoadingBlock } from "@/common/molecules/LoadingBlock";
 import { useTickets } from "@/tickets/hooks/useTickets";
 import { useFeatureFlag } from "@/common/hooks/useFeatureFlag";
-import { getApiErrorMessage } from "@/common/api/errorMessage";
+import { getApiErrorMessage } from "@/common/api/errors/getApiErrorMessage";
 
 export function AttentionPanel() {
   const ticketsEnabled = useFeatureFlag("PROJECT_AGENT_ENABLED");

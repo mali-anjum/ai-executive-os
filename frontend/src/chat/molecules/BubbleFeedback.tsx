@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 import { useSubmitQueryFeedbackMutation } from "@/common/api/endpoints/knowledge.api";
 
-import { getApiErrorMessage } from "@/common/api/errorMessage";
+import { getApiErrorMessage } from "@/common/api/errors/getApiErrorMessage";
 
 type FeedbackValue = "positive" | "negative";
 
