@@ -61,7 +61,7 @@ function NavLink({
     >
       <Icon
         className={cn(
-          "h-[18px] w-[18px] shrink-0 transition-colors",
+          "h-4.5 w-4.5 shrink-0 transition-colors",
           active ? "text-accent-blue" : "text-muted-foreground group-hover:text-accent-blue"
         )}
         aria-hidden
@@ -86,11 +86,11 @@ export function AppSidebar({ className }: { className?: string }) {
   return (
     <aside
       className={cn(
-        "flex h-full w-[var(--sidebar-width)] shrink-0 flex-col border-r border-border bg-surface-elevated",
+        "flex h-full w-(--sidebar-width) shrink-0 flex-col border-r border-border bg-surface-elevated",
         className
       )}
     >
-      <div className="flex h-[var(--header-height)] items-center border-b border-border px-4">
+      <div className="flex h-(--header-height) items-center border-b border-border px-4">
         <Logo href="/dashboard" />
       </div>
 
