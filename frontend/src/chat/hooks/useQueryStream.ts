@@ -6,11 +6,8 @@ import { apiErrorMessage } from "@/common/api/errors/apiErrorMessage";
 import { fetchWithTimeout } from "@/common/api/fetch";
 import type { QueryResponse } from "@/common/types";
 import { parseStreamSseEvent } from "@/common/types/http/stream-events";
-
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
-/** Chat can wait on retrieval + LLM longer than typical REST calls. */
-const STREAM_TIMEOUT_MS = 120_000;
+import { API_BASE } from "@/common/constants";
+import { STREAM_TIMEOUT_MS } from "@/chat/utils/constant";
 
 export function useQueryStream() {
   const abortRef = useRef<AbortController | null>(null);
