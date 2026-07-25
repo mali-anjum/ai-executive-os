@@ -1,13 +1,16 @@
 "use client";
 
 import { useUser } from "@/common/hooks/useUser";
-
+import { getRolePermissions } from "@/auth/hooks/getRolePermissions";
+/**
+ * React hook for accessing the current user's role and permissions.
+ *
+ * Use only inside React Client Components.
+ * Reads the current user's role from application state and delegates
+ * permission logic to `getRolePermissions()`.
+ */
 export function useRole() {
   const { role } = useUser();
-  const isAdmin = role === "admin";
-  const isManager = role === "manager";
-  const isLeadership = isAdmin || isManager;
-  const isEmployee = role === "employee" || (!isAdmin && !isManager && !role);
 
-  return { role, isAdmin, isManager, isLeadership, isEmployee };
+  return getRolePermissions(role);
 }

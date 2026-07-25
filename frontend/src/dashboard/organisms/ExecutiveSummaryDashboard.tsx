@@ -6,13 +6,7 @@ import { Card, CardContent } from "@/common/atoms/ui/card";
 import { useGetExecutiveSummaryQuery } from "@/common/api/endpoints/dashboard.api";
 
 export function ExecutiveSummaryDashboard() {
-  const { data: summary, isLoading, error } = useGetExecutiveSummaryQuery();
-
-  if (isLoading) {
-    return (
-      <div className="text-sm text-muted-foreground">Loading summary...</div>
-    );
-  }
+  const { data: summary, error } = useGetExecutiveSummaryQuery();
 
   if (error) {
     return (

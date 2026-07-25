@@ -16,7 +16,7 @@ const userSlice = createSlice({
   reducers: {
     setUser(
       state,
-      action: PayloadAction<{ email: string | null; role?: string | null }>
+      action: PayloadAction<{ email: string | null; role?: string | null }>,
     ) {
       state.email = action.payload.email;
       state.role = action.payload.role ?? "employee";

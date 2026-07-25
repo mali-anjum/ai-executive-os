@@ -2,13 +2,23 @@
 
 import { AIStatusPanel } from "@/dashboard/molecules/AIStatusPanel";
 import { QuickActions } from "@/dashboard/molecules/QuickActions";
-import { useRole } from "@/common/hooks/useRole";
 import { EmployeeWelcome } from "@/dashboard/atoms/EmployeeWelcome";
 import { ManagerWelcome } from "@/dashboard/atoms/ManagerWelcome";
 import { LeadershipDashboard } from "@/dashboard/organisms/LeaderShipBoard";
+import { getRolePermissions } from "@/auth/hooks/getRolePermissions";
+import type { DashboardInitialUser } from "@/auth/services/serverAuth";
 
-export function DashboardScreen() {
-  const { isAdmin, isManager, isLeadership } = useRole();
+export function DashboardScreen({
+  initialUser,
+}: {
+  initialUser: DashboardInitialUser | null;
+}) {
+
+  const {
+    isAdmin,
+    isManager,
+    isLeadership,
+  } = getRolePermissions(initialUser?.role);
 
   if (!isLeadership) {
     return (
