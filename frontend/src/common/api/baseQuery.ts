@@ -20,7 +20,7 @@ export const baseQuery: BaseQueryFn<
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
   const authHeaders = await getAuthHeaders();
-
+  
   const request =
     typeof args === "string"
       ? {
@@ -34,9 +34,13 @@ export const baseQuery: BaseQueryFn<
             ...(args.headers ?? {}),
           },
         };
-
+        console.time(
+          typeof args === "string" ? args : args.url
+        );
   const result = await rawBaseQuery(request, api, extraOptions);
-
+  console.timeEnd(
+    typeof args === "string" ? args : args.url
+  );
   if (!result.error) {
     return result;
   }

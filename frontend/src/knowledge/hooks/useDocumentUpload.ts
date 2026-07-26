@@ -7,6 +7,7 @@ import {
 } from "@/common/api/endpoints/knowledge.api";
 import type { UploadDocumentRequest } from "@/common/types/knowledge";
 import { isDocumentProcessing } from "@/common/types";
+import { isApiUnreachableError } from "@/common/api";
 import { getApiErrorMessage } from "@/common/api/errors/getApiErrorMessage";
 import { toast } from "@/common/lib/toast";
 
@@ -28,6 +29,7 @@ export function useDocumentUpload(options?: UseDocumentUploadOptions) {
     refetchOnFocus: true,
     refetchOnReconnect: true,
   });
+  const apiUnreachable = isApiUnreachableError(documentsError);
 
   const [uploadDocument, { isLoading: isUploading }] =
     useUploadDocumentMutation();
@@ -88,6 +90,7 @@ export function useDocumentUpload(options?: UseDocumentUploadOptions) {
     isFetching,
     isUploading,
     hasProcessing,
+    apiUnreachable,
     error: documentsError,
     upload,
     refresh: refetch,

@@ -6,7 +6,7 @@ import { EmployeeWelcome } from "@/dashboard/atoms/EmployeeWelcome";
 import { ManagerWelcome } from "@/dashboard/atoms/ManagerWelcome";
 import { LeadershipDashboard } from "@/dashboard/organisms/LeaderShipBoard";
 import { getRolePermissions } from "@/auth/hooks/getRolePermissions";
-import type { DashboardInitialUser } from "@/auth/services/serverAuth";
+import type { DashboardInitialUser } from "@/auth/types/DashboardInitializedUser";
 
 export function DashboardScreen({
   initialUser,
