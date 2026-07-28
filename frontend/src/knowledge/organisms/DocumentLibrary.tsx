@@ -46,7 +46,7 @@ export function DocumentLibrary() {
   return (
     <div className="space-y-6">
       <FileUploadCard onUpload={upload} isUploading={isUploading} />
-      {error ? <ErrorState message={error} onRetry={() => refresh()} /> : null}
+      {error ? <ErrorState error={error} onRetry={() => void refresh()} /> : null}
 
       {isLoading && documents.length === 0 ? (
         <LoadingBlock rows={4} label="Loading documents" />

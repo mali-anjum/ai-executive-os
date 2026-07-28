@@ -1,22 +1,28 @@
 import { act, waitFor } from "@testing-library/react";
 import { renderHookWithStore } from "@/common/store/test-utils";
 import { useTickets } from "../useTickets";
+import * as ticketsApi from "@/common/api/endpoints/tickets.api";
 
-jest.mock("@/common/api/client", () => ({
-  listTickets: jest.fn(),
+jest.mock("@/common/api/endpoints/tickets.api", () => ({
+  ...jest.requireActual("@/common/api/endpoints/tickets.api"),
+  useListTicketsQuery: jest.fn(),
 }));
 
-import { listTickets } from "@/common/api/client";
-
-const mockList = listTickets as jest.MockedFunction<typeof listTickets>;
+const mockUseListTicketsQuery = ticketsApi.useListTicketsQuery as jest.Mock;
 
 describe("useTickets", () => {
   beforeEach(() => {
-    mockList.mockReset();
+    jest.clearAllMocks();
   });
 
   it("finishes loading with empty tickets", async () => {
-    mockList.mockResolvedValue([]);
+    mockUseListTicketsQuery.mockReturnValue({
+      data: [],
+      error: undefined,
+      isLoading: false,
+      isFetching: false,
+      refetch: jest.fn(),
+    });
 
     const { result } = renderHookWithStore(() => useTickets());
 
@@ -25,15 +31,21 @@ describe("useTickets", () => {
     });
 
     expect(result.current.tickets).toEqual([]);
-    expect(result.current.error).toBeNull();
+    expect(result.current.error).toBeUndefined();
   });
 
   it("surfaces API unreachable errors", async () => {
-    mockList.mockRejectedValue(
-      new Error(
-        "Cannot reach the API. Start the backend (npm run dev or npm run prod in backend/)."
-      )
-    );
+    const mockRefresh = jest.fn();
+    mockUseListTicketsQuery.mockReturnValue({
+      data: [],
+      error: {
+        status: "FETCH_ERROR",
+        error: "Cannot reach the API. Start the backend (npm run dev or npm run prod in backend/).",
+      },
+      isLoading: false,
+      isFetching: false,
+      refetch: mockRefresh,
+    });
 
     const { result } = renderHookWithStore(() => useTickets());
 
@@ -43,6 +55,6 @@ describe("useTickets", () => {
 
     expect(result.current.isLoading).toBe(false);
     expect(result.current.apiUnreachable).toBe(true);
-    expect(result.current.error).toMatch(/cannot reach/i);
+    expect(result.current.error).toMatchObject({ status: "FETCH_ERROR" });
   });
 });

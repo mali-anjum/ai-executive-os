@@ -24,7 +24,7 @@ export function TicketFeed() {
   }
 
   if (error) {
-    return <ErrorState message={error} />;
+    return <ErrorState error={error} />;
   }
 
   if (isLoading && tickets.length === 0) {

@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { type TicketRecord } from "@/common/api/client";
+import { isApiUnreachableError } from "@/common/api";
 import { ticketsPolling } from "@/common/config/polling.config";
 import { useFeatureFlag } from "@/common/hooks/useFeatureFlag";
 import { useListTicketsQuery } from "@/common/api/endpoints/tickets.api";
@@ -39,10 +40,13 @@ export function useTickets() {
     return normalizeTickets(data);
   }, [data]);
 
+  const apiUnreachable = isApiUnreachableError(error);
+
   return {
     tickets,
     isLoading,
     isFetching,
+    apiUnreachable,
     error,
     refresh: refetch,
   };

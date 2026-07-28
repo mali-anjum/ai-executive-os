@@ -3,14 +3,52 @@
 export const API_TIMEOUT_MS = 15_000;
 
 export function isApiUnreachableError(error: unknown): boolean {
-  if (!(error instanceof Error)) return false;
-  const msg = error.message.toLowerCase();
-  return (
-    msg.includes("cannot reach the api") ||
-    msg.includes("timed out") ||
-    msg.includes("failed to fetch") ||
-    msg.includes("network")
-  );
+  if (!error) return false;
+
+  if (error instanceof Error) {
+    const msg = error.message.toLowerCase();
+    return (
+      msg.includes("cannot reach the api") ||
+      msg.includes("timed out") ||
+      msg.includes("failed to fetch") ||
+      msg.includes("network")
+    );
+  }
+
+  if (typeof error === "string") {
+    const msg = error.toLowerCase();
+    return (
+      msg.includes("cannot reach the api") ||
+      msg.includes("timed out") ||
+      msg.includes("failed to fetch") ||
+      msg.includes("network")
+    );
+  }
+
+  if (typeof error === "object") {
+    const record = error as Record<string, unknown>;
+    const status = record.status;
+    if (status === "FETCH_ERROR" || status === "TIMEOUT_ERROR") {
+      return true;
+    }
+    if (typeof status === "number" && status === 0) {
+      return true;
+    }
+
+    const message = typeof record.message === "string" ? record.message : undefined;
+    const detail = typeof record.error === "string" ? record.error : message;
+    if (detail) {
+      const msg = detail.toLowerCase();
+      return (
+        msg.includes("cannot reach the api") ||
+        msg.includes("timed out") ||
+        msg.includes("failed to fetch") ||
+        msg.includes("network")
+      );
+    }
+  }
+
+  return false;
 }
 
 export async function fetchWithTimeout(

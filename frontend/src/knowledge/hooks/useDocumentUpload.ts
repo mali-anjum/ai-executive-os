@@ -59,6 +59,11 @@ export function useDocumentUpload(options?: UseDocumentUploadOptions) {
     },
     [uploadDocument, isUploading, refetch],
   );
+
+  const refresh = useCallback(async (options?: { background?: boolean }) => {
+    void options;
+    await refetch();
+  }, [refetch]);
   
   const hasProcessing = documents.some((document) =>
     isDocumentProcessing(document.status),
@@ -93,6 +98,6 @@ export function useDocumentUpload(options?: UseDocumentUploadOptions) {
     apiUnreachable,
     error: documentsError,
     upload,
-    refresh: refetch,
+    refresh,
   };
 }
