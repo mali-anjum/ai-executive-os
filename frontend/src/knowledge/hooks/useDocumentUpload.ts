@@ -15,6 +15,10 @@ type UseDocumentUploadOptions = {
   pollingEnabled?: boolean;
 };
 
+type RefreshOptions = {
+  background?: boolean;
+};
+
 export function useDocumentUpload(options?: UseDocumentUploadOptions) {
   const pollingEnabled = options?.pollingEnabled ?? true;
 
@@ -34,6 +38,20 @@ export function useDocumentUpload(options?: UseDocumentUploadOptions) {
   const [uploadDocument, { isLoading: isUploading }] =
     useUploadDocumentMutation();
 
+  const refresh = useCallback(
+    async (options?: RefreshOptions) => {
+      const shouldRefreshInBackground = options?.background ?? false;
+
+      if (shouldRefreshInBackground) {
+        await refetch();
+        return;
+      }
+
+      await refetch();
+    },
+    [refetch],
+  );
+
   /**
    * Upload document and refresh cache.
    *
@@ -52,18 +70,13 @@ export function useDocumentUpload(options?: UseDocumentUploadOptions) {
 
         toast.success("Document uploaded successfully.");
 
-        await refetch();
+        await refresh({ background: true });
       } catch (error) {
         toast.error(getApiErrorMessage(error));
       }
     },
-    [uploadDocument, isUploading, refetch],
+    [uploadDocument, isUploading, refresh],
   );
-
-  const refresh = useCallback(async (options?: { background?: boolean }) => {
-    void options;
-    await refetch();
-  }, [refetch]);
   
   const hasProcessing = documents.some((document) =>
     isDocumentProcessing(document.status),
