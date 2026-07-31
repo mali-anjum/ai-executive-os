@@ -63,6 +63,7 @@ export const authService = {
   }> {
     const supabase = createClient();
     const { data, error } = await supabase.auth.getSession();
+    console.log(data);
     return { session: data.session, error };
   },
 
