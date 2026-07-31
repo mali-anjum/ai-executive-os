@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "bash -c 'set -a && source .env.dev && set +a && exec next dev'",
     "dev:prod": "bash -c 'set -a && source .env.production && set +a && exec next dev'",
-    "build": "next build",
+    "build": "next build --webpack",
     "build:local-dev": "bash -c 'set -a && source .env.dev && set +a && exec next build'",
     "build:local-prod": "bash -c 'set -a && source .env.production && set +a && exec next build'",
     "start": "next start",
@@ -49,7 +49,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.2.7",
+    "eslint-config-next": "16.2.12",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "tailwindcss": "^4",
