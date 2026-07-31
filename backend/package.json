@@ -42,6 +42,6 @@
     "bootstrap": "npm run deps:docker && npm run setup && npm run db:migrate"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^10.0.4"
   }
 }
