@@ -1,19 +1,24 @@
+# Dependencies
 node_modules/
-.next/
-out/
-build/
+.pnpm-store/
+
+# Python
 .venv/
 __pycache__/
 *.pyc
+
+# Next.js
+.next/
+out/
+
+# Env files
 .env
 .env.dev
 .env.local
 .env.production
 .env*.local
-*.pem
-.DS_Store
-/tmp/uploads/
 
-# Supabase CLI local state
-supabase/.branches
-supabase/.temp
+# Misc
+.DS_Store
+*.pem
+*.log

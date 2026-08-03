@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import asyncio
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.db.tables import Document, QueryLog, Ticket
@@ -27,34 +28,51 @@ class ExecutiveSummaryService:
             hour=0, minute=0, second=0, microsecond=0
         )
 
-        query_base = select(func.count(QueryLog.id)).where(QueryLog.org_id == org_id)
-        total_queries = (await db.execute(query_base)).scalar() or 0
+        # Single aggregate query over QueryLog — computes total, today, escalated,
+        # and low-confidence counts in one round-trip instead of four.
+        agg_row = (
+            await db.execute(
+                select(
+                    func.count(QueryLog.id).label("total"),
+                    func.count(
+                        case((QueryLog.created_at >= today_start, 1))
+                    ).label("today"),
+                    func.count(
+                        case((QueryLog.escalated.is_(True), 1))
+                    ).label("escalated"),
+                    func.count(
+                        case(
+                            (
+                                QueryLog.confidence_score.isnot(None)
+                                & (QueryLog.confidence_score < 0.45)
+                                & (QueryLog.escalated.is_(False)),
+                                1,
+                            )
+                        )
+                    ).label("low_conf"),
+                ).where(QueryLog.org_id == org_id)
+            )
+        ).one()
 
-        queries_today_stmt = query_base.where(QueryLog.created_at >= today_start)
-        queries_today = (await db.execute(queries_today_stmt)).scalar() or 0
+        total_queries = agg_row.total or 0
+        queries_today = agg_row.today or 0
+        escalated_queries = agg_row.escalated or 0
+        low_confidence_unanswered = agg_row.low_conf or 0
 
-        escalated_stmt = query_base.where(QueryLog.escalated.is_(True))
-        escalated_queries = (await db.execute(escalated_stmt)).scalar() or 0
-
-        automated_queries = max(0, total_queries - escalated_queries)
-        estimated_hours_saved = round(
-            automated_queries * _MINUTES_SAVED_PER_AUTOMATED_QUERY / 60, 1
-        )
-
+        # Documents + open tickets + knowledge gaps in parallel (independent
+        # tables, safe to interleave on the same session since they're separate
+        # statements). This cuts 3 sequential round-trips to 1 parallel batch.
         docs_stmt = select(func.count(Document.id)).where(
             Document.org_id == org_id,
             Document.status == "ready",
             Document.deleted_at.is_(None),
         )
-        documents_ready = (await db.execute(docs_stmt)).scalar() or 0
-
         ticket_stmt = select(func.count(Ticket.id)).where(
             Ticket.org_id == org_id,
             Ticket.status.in_(("open", "in_progress", "pending_approval")),
         )
         if department:
             ticket_stmt = ticket_stmt.where(Ticket.department == department)
-        open_tickets = (await db.execute(ticket_stmt)).scalar() or 0
 
         gaps_stmt = (
             select(QueryLog.query_text, func.count(QueryLog.id).label("count"))
@@ -66,17 +84,23 @@ class ExecutiveSummaryService:
             .order_by(func.count(QueryLog.id).desc())
             .limit(8)
         )
-        gap_rows = (await db.execute(gaps_stmt)).all()
+
+        docs_result, tickets_result, gaps_result = await asyncio.gather(
+            db.execute(docs_stmt),
+            db.execute(ticket_stmt),
+            db.execute(gaps_stmt),
+        )
+        documents_ready = docs_result.scalar() or 0
+        open_tickets = tickets_result.scalar() or 0
+        gap_rows = gaps_result.all()
         knowledge_gaps: list[TopQuestionRow] = [
             {"question": row[0], "count": int(row[1])} for row in gap_rows
         ]
 
-        low_conf_stmt = query_base.where(
-            QueryLog.confidence_score.isnot(None),
-            QueryLog.confidence_score < 0.45,
-            QueryLog.escalated.is_(False),
+        automated_queries = max(0, total_queries - escalated_queries)
+        estimated_hours_saved = round(
+            automated_queries * _MINUTES_SAVED_PER_AUTOMATED_QUERY / 60, 1
         )
-        low_confidence_unanswered = (await db.execute(low_conf_stmt)).scalar() or 0
 
         escalation_rate_pct = (
             round(100.0 * escalated_queries / total_queries, 1)

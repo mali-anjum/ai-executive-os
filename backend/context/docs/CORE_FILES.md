@@ -32,6 +32,6 @@ Use this map when debugging. **Not a `.venv` issue** — Python deps are fine; e
 
 ```bash
 # Repo root — both apps
-npm run dev    # backend/.env.dev + frontend/.env.dev
-npm run prod   # backend/.env.production + frontend/.env.production
+pnpm run dev    # backend/.env.dev + frontend/.env.dev
+pnpm run prod   # backend/.env.production + frontend/.env.production
 ```

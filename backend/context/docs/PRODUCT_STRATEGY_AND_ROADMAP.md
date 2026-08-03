@@ -358,7 +358,7 @@ Prioritized by **impact vs effort** for freelancing and portfolio.
 | `**manager` role**                       | ✅      | `admin` | `manager` | `employee`; managers get dept-scoped tickets + leadership dashboards |
 | **Unanswered questions report**          | ✅      | `UnansweredQuestionsReport`, `GET /evaluation/unanswered`                                  |
 | **Slack dual-mode Q&A + routing**        | ✅      | `slack_message_mode()` — questions → Q&A, `!ticket` / urgent → Project Agent               |
-| **One-click demo tenant**                | ✅      | `DemoSeedCard` + `POST /demo/seed` + `npm run demo:seed`                                   |
+| **One-click demo tenant**                | ✅      | `DemoSeedCard` + `POST /demo/seed` + `pnpm run demo:seed`                                   |
 
 
 ### 6.2 High impact, higher effort (enterprise tier)

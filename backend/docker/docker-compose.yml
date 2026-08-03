@@ -29,7 +29,7 @@ services:
 
   api:
     build:
-      context: ../backend
+      context: ..
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
@@ -54,7 +54,7 @@ services:
 
   worker:
     build:
-      context: ../backend
+      context: ..
       dockerfile: Dockerfile
     environment:
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/sop_automator
@@ -75,7 +75,7 @@ services:
 
   frontend:
     build:
-      context: ../frontend
+      context: ../../frontend
       dockerfile: Dockerfile
     ports:
       - "3000:3000"

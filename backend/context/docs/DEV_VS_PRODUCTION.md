@@ -21,10 +21,10 @@ Related: [ENV_QUICK_START.md](./ENV_QUICK_START.md) · [ENVIRONMENT_VARIABLES.md
 
 | | **Which file loads** | **`APP_ENV` in that file** |
 |--|----------------------|----------------------------|
-| **Controlled by** | `npm run dev` → `.env.dev`; `npm run prod` → `.env.production` (`ENV_FILE` in npm scripts) | Variable inside the loaded file |
+| **Controlled by** | `pnpm run dev` → `.env.dev`; `pnpm run prod` → `.env.production` (`ENV_FILE` in pnpm scripts) | Variable inside the loaded file |
 | **Does** | Picks `DATABASE_URL`, Redis, keys, etc. | Picks auth strictness and validation (not the file path) |
 
-**`APP_ENV=production` inside `.env.dev` does not load `.env.production`.** Use `npm run prod` with `backend/.env.production` filled in.
+**`APP_ENV=production` inside `.env.dev` does not load `.env.production`.** Use `pnpm run prod` with `backend/.env.production` filled in.
 
 Full explanation: [../README.md#dont-confuse-which-env-file-loads-vs-app_env-backend](../README.md#dont-confuse-which-env-file-loads-vs-app_env-backend) · [../backend/README.md](../backend/README.md#dont-confuse-env_file-vs-app_env)
 
@@ -35,15 +35,15 @@ Full explanation: [../README.md#dont-confuse-which-env-file-loads-vs-app_env-bac
 | | **Development** | **Production** |
 |---|-----------------|----------------|
 | **Purpose** | Daily coding, hot reload | Same behavior as deployed server |
-| **Backend active file** | `backend/.env.dev` (`npm run dev`) | `backend/.env.production` (`npm run prod`) |
+| **Backend active file** | `backend/.env.dev` (`pnpm run dev`) | `backend/.env.production` (`pnpm run prod`) |
 | **Backend template** | `backend/.env.example` | copy to `.env.production` from example |
 | **Frontend active file** | `frontend/.env.dev` | `frontend/.env.production` |
 | **Frontend template** | `frontend/.env.example` | `frontend/.env.production.example` |
 | **`APP_ENV`** | `development` | `production` or `prod` |
 | **API auth** | Supabase JWT **or** dev headers `X-Org-Id`, `X-User-Id`, `X-User-Role` | **Supabase JWT only** |
 | **Startup validation** | Warns on missing LLM key | **Exits** if `ENCRYPTION_KEY`, LLM key, etc. missing |
-| **Backend start** | `npm run dev` (reload + Celery) | Server: `uvicorn` + `celery` (or Docker) |
-| **Frontend start** | `npm run dev` | `npm run build` → `npm run start` |
+| **Backend start** | `pnpm run dev` (reload + Celery) | Server: `uvicorn` + `celery` (or Docker) |
+| **Frontend start** | `pnpm run dev` | `pnpm run build` → `pnpm run start` |
 | **Database (laptop)** | Docker `127.0.0.1:5433` recommended | Local `5433` OK for test; real deploy uses hosted Postgres |
 | **Redis (laptop)** | `127.0.0.1:6379` or Docker `6380` | Local or Upstash `rediss://...` |
 
@@ -59,9 +59,9 @@ ai-executive-os/
 │   ├── .env.production.example   ← Prod template (commit)
 │   └── .env.production           ← Your prod secrets (gitignored) — create yourself
 ├── frontend/
-│   ├── .env.local                ← ACTIVE for npm run dev (gitignored)
+│   ├── .env.local                ← ACTIVE for pnpm run dev (gitignored)
 │   ├── .env.example              ← Dev template
-│   └── .env.production             ← ACTIVE for npm run build (gitignored)
+│   └── .env.production             ← ACTIVE for pnpm run build (gitignored)
 └── docker/
     └── .env                      ← Full stack Docker only
 ```
@@ -78,7 +78,7 @@ Use this **every day** or when something breaks after pulling code.
 
 ```bash
 cd backend
-npm run db:check
+pnpm run db:check
 ```
 
 **Expect:**
@@ -93,7 +93,7 @@ Postgres and Redis OK.
 
 ```bash
 cd backend
-npm run check:env
+pnpm run check:env
 ```
 
 **Expect:** `APP_ENV=development` and `Validation passed`.
@@ -102,8 +102,8 @@ npm run check:env
 
 ```bash
 cd backend
-npm run deps:docker    # if Postgres container not running
-npm run dev
+pnpm run deps:docker    # if Postgres container not running
+pnpm run dev
 ```
 
 **Expect in terminal:**
@@ -125,7 +125,7 @@ curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8000/docs
 
 ```bash
 cd frontend
-npm run dev
+pnpm run dev
 ```
 
 Open http://localhost:3000 — login page loads (Supabase configured).
@@ -178,7 +178,7 @@ cp .env.production.example .env.production
 
 For **local prod test**, you may keep the same `DATABASE_URL` as dev (Docker on `5433`) so you do not depend on Supabase network from your laptop. Use hosted `DATABASE_URL` only when testing remote DB on purpose.
 
-**Remote Supabase from laptop:** see **[SUPABASE_REMOTE_DATABASE.md](./SUPABASE_REMOTE_DATABASE.md)** (pooler URI + `npm run dev:prod`).
+**Remote Supabase from laptop:** see **[SUPABASE_REMOTE_DATABASE.md](./SUPABASE_REMOTE_DATABASE.md)** (pooler URI + `pnpm run dev:prod`).
 
 **Recommended on laptop when remote DB fails (IPv6 / firewall):**
 
@@ -186,8 +186,8 @@ For **local prod test**, you may keep the same `DATABASE_URL` as dev (Docker on 
 cd backend
 cp .env.production.local.example .env.production.local
 # Edit .env.production.local: paste SUPABASE_*, ENCRYPTION_KEY, GEMINI_* from .env.production
-npm run deps:docker:all
-npm run dev:prod:local
+pnpm run deps:docker:all
+pnpm run dev:prod:local
 ```
 
 This runs `APP_ENV=production` (real JWT rules) against **local** Postgres on `5433` and Redis on `6380`.
@@ -204,18 +204,18 @@ This runs `APP_ENV=production` (real JWT rules) against **local** Postgres on `5
 ```bash
 cd backend
 cp .env.production .env
-npm run check:prod
-npm run deps:docker
-npm run dev
+pnpm run check:prod
+pnpm run deps:docker
+pnpm run dev
 ```
 
 **Option B — keep dev file, override one variable (quick test)**
 
 ```bash
 cd backend
-APP_ENV=production npm run check:prod
+APP_ENV=production pnpm run check:prod
 # Fix any errors in .env, then:
-APP_ENV=production npm run dev
+APP_ENV=production pnpm run dev
 ```
 
 `check:prod` validates **production rules** against values currently in `backend/.env`.
@@ -224,7 +224,7 @@ APP_ENV=production npm run dev
 
 ```bash
 cd backend
-npm run check:prod
+pnpm run check:prod
 ```
 
 **Must pass** before you trust prod mode:
@@ -237,7 +237,7 @@ npm run check:prod
 | `SUPABASE_URL` | Needed for real login (JWT verify) |
 
 ```bash
-npm run db:check
+pnpm run db:check
 curl -s http://127.0.0.1:8000/api/v1/health
 ```
 
@@ -245,15 +245,15 @@ curl -s http://127.0.0.1:8000/api/v1/health
 
 **Light test (same UI, prod backend):**
 
-Keep `frontend/.env.local` and use `npm run dev` — enough to test JWT + chat against `APP_ENV=production` API.
+Keep `frontend/.env.local` and use `pnpm run dev` — enough to test JWT + chat against `APP_ENV=production` API.
 
 **Full production frontend build:**
 
 ```bash
 cd frontend
 cp .env.production .env.production.local   # or ensure .env.production exists
-npm run build
-npm run start
+pnpm run build
+pnpm run start
 ```
 
 Open http://localhost:3000 — this is optimized production Next.js, not hot reload.
@@ -288,7 +288,7 @@ cp .env.development.backup .env.local
 | Use prod backend | `cp backend/.env.production backend/.env` |
 | Restore dev backend | `cp backend/.env.development.backup backend/.env` |
 | Save dev frontend | `cp frontend/.env.local frontend/.env.development.backup` |
-| Use prod frontend build | `cp frontend/.env.production frontend/.env.production` + `npm run build` |
+| Use prod frontend build | `cp frontend/.env.production frontend/.env.production` + `pnpm run build` |
 
 **Do not** delete `.env.development.backup` until prod test passed.
 
@@ -325,22 +325,22 @@ Use `backend/.env.production` as a **reference** when setting server secrets —
 
 ### Development OK?
 
-- [ ] `cd backend && npm run db:check` → Postgres and Redis OK
-- [ ] `cd backend && npm run check:env` → Validation passed
-- [ ] `cd backend && npm run dev` → API + Celery ready
+- [ ] `cd backend && pnpm run db:check` → Postgres and Redis OK
+- [ ] `cd backend && pnpm run check:env` → Validation passed
+- [ ] `cd backend && pnpm run dev` → API + Celery ready
 - [ ] `curl http://127.0.0.1:8000/api/v1/health` → OK
-- [ ] `cd frontend && npm run dev` → http://localhost:3000 loads
+- [ ] `cd frontend && pnpm run dev` → http://localhost:3000 loads
 - [ ] Login + chat works
 
 ### Production-ready (local simulation)?
 
 - [ ] `backend/.env.production.local` created from `.env.production.local.example` + secrets from `.env.production`
 - [ ] `APP_ENV=production`
-- [ ] `cd backend && ENV_FILE=.env.production.local npm run check:prod` → Validation passed
-- [ ] `npm run db:check:prod:local` → OK (Docker Postgres + Redis)
-- [ ] `npm run dev:prod:local` → starts without exit
+- [ ] `cd backend && ENV_FILE=.env.production.local pnpm run check:prod` → Validation passed
+- [ ] `pnpm run db:check:prod:local` → OK (Docker Postgres + Redis)
+- [ ] `pnpm run dev:prod:local` → starts without exit
 - [ ] Chat works **only when logged in** (no dev headers)
-- [ ] Optional: `cd frontend && npm run build && npm run start` → prod UI
+- [ ] Optional: `cd frontend && pnpm run build && pnpm run start` → prod UI
 - [ ] Restored `.env.development.backup` → dev workflow again
 
 ---
@@ -351,41 +351,41 @@ From **repo root** (starts backend + frontend):
 
 | Command | Env files | What runs |
 |---------|-----------|-----------|
-| `npm run dev` | `backend/.env.dev` + `frontend/.env.dev` | Docker Postgres/Redis → check → migrate → API + Celery + Next dev |
-| `npm run prod` | `backend/.env.production` + `frontend/.env.production` | Verify Supabase refs → check → migrate remote DB → API + Celery + Next dev |
+| `pnpm run dev` | `backend/.env.dev` + `frontend/.env.dev` | Docker Postgres/Redis → check → migrate → API + Celery + Next dev |
+| `pnpm run prod` | `backend/.env.production` + `frontend/.env.production` | Verify Supabase refs → check → migrate remote DB → API + Celery + Next dev |
 
 Per package only:
 
 ```bash
-cd backend && npm run dev    # .env.dev
-cd backend && npm run prod   # .env.production
+cd backend && pnpm run dev    # .env.dev
+cd backend && pnpm run prod   # .env.production
 
-cd frontend && npm run dev   # .env.dev
-cd frontend && npm run prod  # .env.production
+cd frontend && pnpm run dev   # .env.dev
+cd frontend && pnpm run prod  # .env.production
 ```
 
-First time: `npm run setup` from repo root.
+First time: `pnpm run setup` from repo root.
 
 ---
 
-## npm scripts reference
+## pnpm scripts reference
 
 ### Backend (`backend/package.json`)
 
 | Script | When |
 |--------|------|
-| `npm run check:env` | Validate **development** rules |
-| `npm run check:prod` | Validate **production** rules (current `.env` values) |
-| `npm run db:check` | TCP check Postgres + Redis |
-| `npm run dev` | Run API + worker (dev or prod `APP_ENV`) |
+| `pnpm run check:env` | Validate **development** rules |
+| `pnpm run check:prod` | Validate **production** rules (current `.env` values) |
+| `pnpm run db:check` | TCP check Postgres + Redis |
+| `pnpm run dev` | Run API + worker (dev or prod `APP_ENV`) |
 
 ### Frontend (`frontend/package.json`)
 
 | Script | When |
 |--------|------|
-| `npm run dev` | Development UI |
-| `npm run build` | Production build |
-| `npm run start` | Serve production build |
+| `pnpm run dev` | Development UI |
+| `pnpm run build` | Production build |
+| `pnpm run start` | Serve production build |
 
 ---
 
@@ -397,4 +397,4 @@ First time: `npm run setup` from repo root.
 | `check:prod` fails on `ENCRYPTION_KEY` | Generate Fernet key (see README) |
 | Chat 401 in prod mode | Log in via Supabase; align `SUPABASE_URL` backend = frontend project |
 | Startup exit code 1 | Read log lines from `startup_validation` |
-| Still uses dev headers | Set `APP_ENV=production` and restart `npm run dev` |
+| Still uses dev headers | Set `APP_ENV=production` and restart `pnpm run dev` |

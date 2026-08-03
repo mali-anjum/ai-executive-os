@@ -17,7 +17,7 @@
 
 ```bash
 cd backend
-npm run db:migrate          # apply Supabase SQL to .env.dev DB
-npm run test:unit           # pytest
-npm run typecheck           # pyright
+pnpm run db:migrate          # apply Supabase SQL to .env.dev DB
+pnpm run test:unit           # pytest
+pnpm run typecheck           # pyright
 ```

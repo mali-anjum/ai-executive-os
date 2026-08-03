@@ -1,6 +1,11 @@
 import { createClient } from "@/common/services/supabase/client";
 
 const SESSION_TIMEOUT_MS = 8_000;
+const SESSION_CACHE_TTL_MS = 60_000; // Re-check Supabase at most once per minute
+
+let cachedHeaders: Record<string, string> | null = null;
+let cachedAt = 0;
+let inflight: Promise<Record<string, string>> | null = null;
 
 async function getSessionWithTimeout() {
   const supabase = createClient();
@@ -15,7 +20,7 @@ async function getSessionWithTimeout() {
   ]);
 }
 
-export async function getAuthHeaders(): Promise<Record<string, string>> {
+async function buildHeaders(): Promise<Record<string, string>> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
@@ -35,4 +40,30 @@ export async function getAuthHeaders(): Promise<Record<string, string>> {
   }
 
   return headers;
+}
+
+export async function getAuthHeaders(): Promise<Record<string, string>> {
+  const now = Date.now();
+
+  // Fast path: return cached headers if fresh.
+  if (cachedHeaders && now - cachedAt < SESSION_CACHE_TTL_MS) {
+    return cachedHeaders;
+  }
+
+  // Deduplicate concurrent calls — only one Supabase round-trip at a time.
+  if (inflight) {
+    return inflight;
+  }
+
+  inflight = buildHeaders()
+    .then((headers) => {
+      cachedHeaders = headers;
+      cachedAt = Date.now();
+      return headers;
+    })
+    .finally(() => {
+      inflight = null;
+    });
+
+  return inflight;
 }

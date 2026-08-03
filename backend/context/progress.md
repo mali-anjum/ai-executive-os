@@ -14,7 +14,7 @@ Track major initiatives and migration status. Update this file when shipping spe
 | Add RLS policies (all tables) | ✅ | `20260603000007_row_level_security.sql` |
 | FK indexes on referencing columns | ✅ | Included in migration files |
 | Decommission Alembic | ✅ | Removed `backend/alembic/`, `alembic.ini`, dep from `requirements.txt` |
-| `npm run db:migrate` → Supabase CLI | ✅ | `backend/scripts/db_push.sh` |
+| `pnpm run db:migrate` → Supabase CLI | ✅ | `backend/scripts/db_push.sh` |
 | CI/CD migration jobs | ✅ | `supabase db push` in `.github/workflows/ci.yml` + `cd.yml` |
 | Backend design patterns doc | ✅ | [`code-desing-patterns.md`](code-desing-patterns.md) |
 | `backend/AGENTS.md` pointer | ✅ | Agents must read design patterns before coding |
@@ -35,15 +35,15 @@ Fixes applied:
 Verify anytime:
 
 ```bash
-cd backend && npm run db:migration:list
+cd backend && pnpm run db:migration:list
 ```
 
 ### Your next steps (manual)
 
 1. **Install Supabase CLI** (if not installed):
    ```bash
-   npm install -g supabase
-   # or: npx supabase --version
+    pnpm add -g supabase
+    # or: npx supabase --version
    ```
 2. **Fix local `.env.dev`** — use Docker Postgres for daily dev:
    ```env
@@ -60,11 +60,11 @@ cd backend && npm run db:migration:list
    ```
 4. **Fresh DB?** Apply all migrations:
    ```bash
-   cd backend && npm run db:migrate
+   cd backend && pnpm run db:migrate
    ```
 5. **Verify:**
    ```bash
-   cd backend && npm run db:migration:list
+   cd backend && pnpm run db:migration:list
    supabase migration list --db-url "postgresql://..."
    ```
 

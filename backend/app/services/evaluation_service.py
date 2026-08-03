@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.db.tables import QueryLog
@@ -12,33 +12,37 @@ from app.models.db.tables import QueryLog
 
 class EvaluationService:
     async def get_metrics(self, db: AsyncSession, org_id: uuid.UUID) -> dict:
-        total_stmt = select(func.count(QueryLog.id)).where(QueryLog.org_id == org_id)
-        total = (await db.execute(total_stmt)).scalar() or 0
+        # Single aggregate query for all counts + avg confidence in one round-trip.
+        agg_stmt = select(
+            func.count(QueryLog.id).label("total"),
+            func.count(
+                case((QueryLog.escalated.is_(True), 1))
+            ).label("escalated"),
+            func.count(
+                case(
+                    (
+                        QueryLog.confidence_score.isnot(None)
+                        & (QueryLog.confidence_score < 0.45),
+                        1,
+                    )
+                )
+            ).label("low_confidence"),
+            func.count(
+                case((QueryLog.feedback == "positive", 1))
+            ).label("positive"),
+            func.count(
+                case((QueryLog.feedback == "negative", 1))
+            ).label("negative"),
+            func.avg(QueryLog.confidence_score).label("avg_confidence"),
+        ).where(QueryLog.org_id == org_id)
 
-        escalated_stmt = select(func.count(QueryLog.id)).where(
-            QueryLog.org_id == org_id,
-            QueryLog.escalated.is_(True),
-        )
-        escalated = (await db.execute(escalated_stmt)).scalar() or 0
+        row = (await db.execute(agg_stmt)).one()
 
-        low_conf_stmt = select(func.count(QueryLog.id)).where(
-            QueryLog.org_id == org_id,
-            QueryLog.confidence_score.isnot(None),
-            QueryLog.confidence_score < 0.45,
-        )
-        low_confidence = (await db.execute(low_conf_stmt)).scalar() or 0
-
-        positive_stmt = select(func.count(QueryLog.id)).where(
-            QueryLog.org_id == org_id,
-            QueryLog.feedback == "positive",
-        )
-        positive = (await db.execute(positive_stmt)).scalar() or 0
-
-        negative_stmt = select(func.count(QueryLog.id)).where(
-            QueryLog.org_id == org_id,
-            QueryLog.feedback == "negative",
-        )
-        negative = (await db.execute(negative_stmt)).scalar() or 0
+        total = row.total or 0
+        escalated = row.escalated or 0
+        low_confidence = row.low_confidence or 0
+        positive = row.positive or 0
+        negative = row.negative or 0
 
         feedback_total = positive + negative
         accuracy_pct = (
@@ -47,13 +51,10 @@ class EvaluationService:
         escalation_rate_pct = (
             round(100.0 * escalated / total, 1) if total else 0.0
         )
-        avg_conf_stmt = select(func.avg(QueryLog.confidence_score)).where(
-            QueryLog.org_id == org_id,
-            QueryLog.confidence_score.isnot(None),
-        )
-        avg_confidence = (await db.execute(avg_conf_stmt)).scalar()
         avg_confidence_pct = (
-            round(float(avg_confidence) * 100, 1) if avg_confidence is not None else None
+            round(float(row.avg_confidence) * 100, 1)
+            if row.avg_confidence is not None
+            else None
         )
 
         unanswered_stmt = (

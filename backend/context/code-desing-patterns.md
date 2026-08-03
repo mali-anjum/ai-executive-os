@@ -42,8 +42,8 @@ tasks/              ← Celery entrypoints (call services, never routers)
 | **Never dashboard-edit** | No schema changes in Supabase UI without a migration file |
 | **ORM mirror** | `app/models/db/tables.py` reflects migration SQL; update both together |
 | **New table checklist** | DDL migration + RLS policies + FK indexes + SQLAlchemy model |
-| **Apply locally** | `cd backend && npm run db:migrate` |
-| **Apply production** | `cd backend && npm run db:migrate:prod` |
+| **Apply locally** | `cd backend && pnpm run db:migrate` |
+| **Apply production** | `cd backend && pnpm run db:migrate:prod` |
 | **New migration** | `supabase migration new <name>` → SQL → `supabase db push` |
 
 ---
@@ -52,7 +52,7 @@ tasks/              ← Celery entrypoints (call services, never routers)
 
 - **Only** `app/core/config.py` reads environment variables (`Settings` + `ENV_FILE`).
 - Never `os.environ` elsewhere — use `from app.core.config import settings`.
-- Dev: `backend/.env.dev` via `npm run dev`. Prod: `backend/.env.production` via `npm run prod`.
+- Dev: `backend/.env.dev` via `pnpm run dev`. Prod: `backend/.env.production` via `pnpm run prod`.
 - `APP_ENV=development` enables dev auth headers; production requires Supabase JWT only.
 
 ---

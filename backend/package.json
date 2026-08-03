@@ -4,10 +4,10 @@
   "private": true,
   "description": "dev → .env.dev + Docker. prod → .env.production + remote Supabase.",
   "scripts": {
-    "setup": "python3 -m venv .venv && .venv/bin/pip install -r requirements.txt && npm install",
+    "setup": "python3 -m venv .venv && .venv/bin/pip install -r requirements.txt && pnpm install",
 
-    "deps:docker": "docker compose -f ../docker/docker-compose.yml up -d postgres",
-    "deps:docker:all": "docker compose -f ../docker/docker-compose.yml up -d postgres redis",
+    "deps:docker": "docker compose -f docker/docker-compose.yml up -d postgres",
+    "deps:docker:all": "docker compose -f docker/docker-compose.yml up -d postgres redis",
 
     "db:check": "ENV_FILE=.env.dev .venv/bin/python scripts/check_services.py",
     "db:migrate": "bash scripts/db_push.sh .env.dev",
@@ -32,14 +32,14 @@
     "test:ci": ".venv/bin/python -m pytest tests/unit/ -q --tb=short",
     "typecheck": ".venv/bin/python -m pyright app",
 
-    "predev": "npm run check:celery && npm run db:check && npm run db:migrate",
-    "preprod": "npm run verify:supabase && npm run check:prod && npm run check:celery && npm run db:check:prod && npm run db:migrate:prod",
+    "predev": "pnpm run check:celery && pnpm run db:check && pnpm run db:migrate",
+    "preprod": "pnpm run verify:supabase && pnpm run check:prod && pnpm run check:celery && pnpm run db:check:prod && pnpm run db:migrate:prod",
 
-    "dev": "npm run deps:docker:all && npm run check:env && concurrently -k -n api,worker -c blue,magenta \"npm run api\" \"npm run worker\"",
-    "prod": "concurrently -k -n api,worker -c blue,magenta \"npm run api:prod\" \"npm run worker:prod\"",
-    "dev:prod": "npm run prod",
+    "dev": "pnpm run deps:docker:all && pnpm run check:env && concurrently -k -n api,worker -c blue,magenta \"pnpm run api\" \"pnpm run worker\"",
+    "prod": "concurrently -k -n api,worker -c blue,magenta \"pnpm run api:prod\" \"pnpm run worker:prod\"",
+    "dev:prod": "pnpm run prod",
 
-    "bootstrap": "npm run deps:docker && npm run setup && npm run db:migrate"
+    "bootstrap": "pnpm run deps:docker && pnpm run setup && pnpm run db:migrate"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

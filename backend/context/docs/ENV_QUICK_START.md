@@ -6,7 +6,7 @@ Use **example** files (safe to commit). Copy to the **active** file name (gitign
 
 | How you run the app | Backend active file | Frontend active file |
 |---------------------|---------------------|----------------------|
-| **Local (recommended)** — `npm run dev` | `backend/.env` ← from `backend/.env.example` | `frontend/.env.local` ← from `frontend/.env.example` |
+| **Local (recommended)** — `pnpm run dev` | `backend/.env` ← from `backend/.env.example` | `frontend/.env.local` ← from `frontend/.env.example` |
 | **Local — all Docker** | `docker/.env` ← from `docker/.env.local.example` | (frontend vars are inside `docker/.env`) |
 | **Production — Docker** | `docker/.env` ← from `docker/.env.production.example` | same `docker/.env` |
 | **Production — split deploy** | `backend/.env` ← from `backend/.env.production.example` | `frontend/.env.production` ← from `frontend/.env.production.example` |
@@ -19,25 +19,25 @@ cd backend
 cp .env.example .env
 # Edit .env: GEMINI_API_KEY, ENCRYPTION_KEY, DATABASE_URL, REDIS_URL
 
-npm run bootstrap    # Docker Postgres/Redis + venv + migrations (first time)
-npm run dev          # daily: checks DB, migrates, API (--reload) + Celery
+pnpm run bootstrap    # Docker Postgres/Redis + venv + migrations (first time)
+pnpm run dev          # daily: checks DB, migrates, API (--reload) + Celery
 
 # Frontend
 cd ../frontend
 cp .env.example .env.local
 # Edit: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY
-npm install && npm run dev
+pnpm install && pnpm run dev
 ```
 
-### Backend npm scripts
+### Backend pnpm scripts
 
 | Command | When to use |
 |---------|-------------|
-| `npm run deps:docker` | Start Postgres + Redis if not already running |
-| `npm run db:check` | Test `DATABASE_URL` / `REDIS_URL` before starting the API |
-| `npm run db:migrate` | Run Alembic only |
-| `npm run dev` | Full local backend (preflight → migrate → API + worker) |
-| `npm run dev:api` | API only, with preflight + migrate |
+| `pnpm run deps:docker` | Start Postgres + Redis if not already running |
+| `pnpm run db:check` | Test `DATABASE_URL` / `REDIS_URL` before starting the API |
+| `pnpm run db:migrate` | Run Alembic only |
+| `pnpm run dev` | Full local backend (preflight → migrate → API + worker) |
+| `pnpm run dev:api` | API only, with preflight + migrate |
 
 Postgres smoke test (must match `DATABASE_URL`):
 
@@ -85,7 +85,7 @@ See also: [ENVIRONMENT_VARIABLES.md](./ENVIRONMENT_VARIABLES.md) · **[DEV_VS_PR
 
 ## Start the full app (chat works)
 
-Chat needs **frontend** (UI + Supabase login) + **backend** (API + LLM + DB). Document upload also needs **Celery** (included in `npm run dev`).
+Chat needs **frontend** (UI + Supabase login) + **backend** (API + LLM + DB). Document upload also needs **Celery** (included in `pnpm run dev`).
 
 ### Local — three terminals (or two)
 
@@ -93,7 +93,7 @@ Chat needs **frontend** (UI + Supabase login) + **backend** (API + LLM + DB). Do
 
 ```bash
 cd backend
-npm run deps:docker
+pnpm run deps:docker
 ```
 
 **Terminal 2 — backend (one command)**
@@ -101,8 +101,8 @@ npm run deps:docker
 ```bash
 cd backend
 cp .env.example .env          # first time only — fill values below
-npm run bootstrap             # first time only
-npm run dev                   # every session: API + Celery + migrate
+pnpm run bootstrap             # first time only
+pnpm run dev                   # every session: API + Celery + migrate
 ```
 
 **Terminal 3 — frontend**
@@ -110,8 +110,8 @@ npm run dev                   # every session: API + Celery + migrate
 ```bash
 cd frontend
 cp .env.example .env.local    # first time only
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 **Use the app:** open http://localhost:3000 → sign in with Supabase → open chat → ask a question.
@@ -139,7 +139,7 @@ docker compose up --build
 | Variable | Example / notes |
 |----------|-----------------|
 | `APP_ENV` | `development` (enables dev header auth fallback) |
-| `DATABASE_URL` | `postgresql+asyncpg://postgres:postgres@127.0.0.1:5433/sop_automator` if using `npm run deps:docker` (host port **5433** avoids clash with system Postgres on 5432). Or your Supabase pooler URL for hosted DB. |
+| `DATABASE_URL` | `postgresql+asyncpg://postgres:postgres@127.0.0.1:5433/sop_automator` if using `pnpm run deps:docker` (host port **5433** avoids clash with system Postgres on 5432). Or your Supabase pooler URL for hosted DB. |
 | `REDIS_URL` | `redis://localhost:6379/0` |
 | `CORS_ORIGINS` | `http://localhost:3000` |
 | `ENCRYPTION_KEY` | Generate: `python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"` |
@@ -159,7 +159,7 @@ docker compose up --build
 
 **Optional local shortcut (no Supabase session):** with `APP_ENV=development`, API accepts headers `X-Org-Id`, `X-User-Id`, `X-User-Role` — the normal UI still uses Supabase login.
 
-**Meaningful answers:** upload at least one document (ingest uses Celery from `npm run dev`).
+**Meaningful answers:** upload at least one document (ingest uses Celery from `pnpm run dev`).
 
 ---
 
@@ -199,7 +199,7 @@ cd backend && alembic upgrade head
 # process manager: uvicorn + celery (or use docker compose service api + worker)
 
 # Frontend
-cd frontend && npm run build && npm run start
+cd frontend && pnpm run build && pnpm run start
 ```
 
 ---
@@ -207,7 +207,7 @@ cd frontend && npm run build && npm run start
 ### Quick checks if chat fails
 
 ```bash
-cd backend && npm run db:check          # Postgres + Redis reachable
+cd backend && pnpm run db:check          # Postgres + Redis reachable
 curl http://localhost:8000/api/v1/health
 ```
 

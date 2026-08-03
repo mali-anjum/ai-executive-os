@@ -49,18 +49,18 @@ For local UI testing, **`CORS_ORIGINS` must include** `http://localhost:3000`.
 ```bash
 cd backend
 cp .env.production .env          # optional: make .env the active file
-npm run check:prod
-npm run db:check:prod
-npm run db:migrate:prod
-npm run dev:prod
+pnpm run check:prod
+pnpm run db:check:prod
+pnpm run db:migrate:prod
+pnpm run dev:prod
 ```
 
 Or without overwriting `.env`:
 
 ```bash
-npm run db:check:prod
-npm run db:migrate:prod
-npm run dev:prod
+pnpm run db:check:prod
+pnpm run db:migrate:prod
+pnpm run dev:prod
 ```
 
 **Expect:** `Checking Postgres… … (using IPv4 x.x.x.x)` then `Postgres and Redis OK.`
@@ -79,7 +79,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon-key>
 
 ```bash
 cd frontend
-npm run dev:prod
+pnpm run dev:prod
 ```
 
 ---

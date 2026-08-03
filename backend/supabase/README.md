@@ -8,10 +8,10 @@ From repo root (requires [Supabase CLI](https://supabase.com/docs/guides/cli)):
 
 ```bash
 # Apply migrations to local Docker Postgres (.env.dev)
-cd backend && npm run db:migrate
+cd backend && pnpm run db:migrate
 
 # Apply to production / remote Supabase (.env.production)
-cd backend && npm run db:migrate:prod
+cd backend && pnpm run db:migrate:prod
 
 # List migration status
 supabase migration list --db-url "postgresql://postgres:postgres@127.0.0.1:5433/sop_automator"
@@ -24,12 +24,12 @@ supabase db push --db-url "$DATABASE_URL"
 
 ## Local development
 
-1. Start Postgres: `cd backend && npm run deps:docker`
+1. Start Postgres: `cd backend && pnpm run deps:docker`
 2. Ensure `backend/.env.dev` uses local DB:
    ```env
    DATABASE_URL=postgresql+asyncpg://postgres:postgres@127.0.0.1:5433/sop_automator
    ```
-3. Apply migrations: `cd backend && npm run db:migrate`
+3. Apply migrations: `cd backend && pnpm run db:migrate`
 
 Optional — full Supabase local stack (Auth, Studio, Storage):
 
@@ -43,7 +43,7 @@ supabase stop
 Use the **Session pooler** URI from the Supabase dashboard (not direct `db.*.supabase.co` on IPv6-only networks). See [`docs/SUPABASE_REMOTE_DATABASE.md`](../docs/SUPABASE_REMOTE_DATABASE.md).
 
 ```bash
-cd backend && npm run db:migrate:prod
+cd backend && pnpm run db:migrate:prod
 ```
 
 ## Migrating from Alembic (existing database)
@@ -71,7 +71,7 @@ For an **Alembic-managed database**, use `migration repair` (above) instead of r
 
 ## Error: `Invalid db.major_version: 16`
 
-Set `major_version = 15` in `supabase/config.toml`. The npm-installed CLI may reject 16 even when your remote project runs Postgres 15.
+Set `major_version = 15` in `supabase/config.toml`. The CLI (installed via pnpm/npm) may reject 16 even when your remote project runs Postgres 15.
 
 ## Error: migrations fail on pooler port 6543
 

@@ -1,10 +1,10 @@
 # Frontend — AI Executive OS
 
-Next.js 16 web app for the monorepo: Supabase authentication, RAG chat (SSE streaming), document library, command-center dashboard, tickets, and feature-flagged analytics.
+Next.js 16 web app for the AI Executive OS: Supabase authentication, RAG chat (SSE streaming), document library, command-center dashboard, tickets, and feature-flagged analytics.
 
-**Monorepo hub:** [`../README.md`](../README.md) (read first for full-stack context)  
-**Dev vs production env:** [`../docs/DEV_VS_PRODUCTION.md`](../docs/DEV_VS_PRODUCTION.md)  
-**Environment variables:** [`../docs/ENVIRONMENT_VARIABLES.md`](../docs/ENVIRONMENT_VARIABLES.md) · [`../docs/ENV_QUICK_START.md`](../docs/ENV_QUICK_START.md)
+**Backend repo:** [`ai-executive-os-backend`](https://github.com/alianjum-web/ai-executive-os-backend) — FastAPI API, Celery, Supabase migrations  
+**Dev vs production env:** [`backend context/docs/DEV_VS_PRODUCTION.md`](https://github.com/alianjum-web/ai-executive-os-backend/blob/main/context/docs/DEV_VS_PRODUCTION.md)  
+**Environment variables:** [`backend context/docs/ENVIRONMENT_VARIABLES.md`](https://github.com/alianjum-web/ai-executive-os-backend/blob/main/context/docs/ENVIRONMENT_VARIABLES.md)
 
 ---
 
@@ -27,8 +27,9 @@ The frontend talks to the FastAPI backend at `NEXT_PUBLIC_API_URL`. Auth tokens 
 
 | Tool | Version | Notes |
 |------|---------|--------|
-| **Node.js** | 18+ | Required for `npm` scripts |
-| **Backend** | running on `:8000` | Start with [`../backend/README.md`](../backend/README.md) or repo-root `npm run dev` |
+| **Node.js** | 18+ | Required for `pnpm` scripts |
+| **pnpm** | 11.17.0 | Package manager (via `corepack`) |
+| **Backend** | running on `:8000` | Start with the backend repo's README or `pnpm run dev` in the backend repo |
 | **Supabase project** | — | Same project as backend `SUPABASE_URL` |
 
 ---
@@ -39,8 +40,8 @@ Two files — do not commit them (gitignored):
 
 | File | Used by | Purpose |
 |------|---------|---------|
-| `.env.dev` | `npm run dev` | Local development (Docker Postgres backend, localhost API) |
-| `.env.production` | `npm run prod` | Production-like test on your laptop (remote Supabase DB, pooler, prod keys) |
+| `.env.dev` | `pnpm run dev` | Local development (Docker Postgres backend, localhost API) |
+| `.env.production` | `pnpm run prod` | Production-like test on your laptop (remote Supabase DB, pooler, prod keys) |
 
 Copy the template once:
 
@@ -64,67 +65,50 @@ Use the **project root URL** for Supabase (`https://<ref>.supabase.co`) — not 
 
 | App | How the file is chosen | Notes |
 |-----|------------------------|--------|
-| **Frontend** | `npm run dev` → `source .env.dev`; `npm run prod` → `source .env.production` | No `APP_ENV` on the frontend — only `NEXT_PUBLIC_*` vars. |
-| **Backend** | `npm run dev` / `prod` set shell `ENV_FILE=.env.dev` or `.env.production` | See [`../backend/README.md`](../backend/README.md#dont-confuse-env_file-vs-app_env): **`APP_ENV` does not switch files**. |
+| **Frontend** | `pnpm run dev` → `source .env.dev`; `pnpm run prod` → `source .env.production` | No `APP_ENV` on the frontend — only `NEXT_PUBLIC_*` vars. |
+| **Backend** | `pnpm run dev` / `prod` set shell `ENV_FILE=.env.dev` or `.env.production` | See the backend repo's README: **`APP_ENV` does not switch files**. |
 
-**Rule for both:** run `npm run dev` for local Docker + dev keys; run `npm run prod` for production-like URLs. Do not set `APP_ENV=production` in `.env.dev` and expect backend to read `.env.production`.
+**Rule for both:** run `pnpm run dev` for local Docker + dev keys; run `pnpm run prod` for production-like URLs. Do not set `APP_ENV=production` in `.env.dev` and expect backend to read `.env.production`.
 
-Monorepo explanation: [`../README.md`](../README.md#dont-confuse-which-env-file-loads-vs-app_env-backend)
+Monorepo explanation: [`backend context/docs/DEV_VS_PRODUCTION.md`](https://github.com/alianjum-web/ai-executive-os-backend/blob/main/context/docs/DEV_VS_PRODUCTION.md)
 
 ---
 
 ## First time only (new contributor)
 
-Run from the **repo root** for the smoothest path (installs backend + frontend together):
+**Frontend-only** (backend is a separate repo — clone and set it up first):
 
 ```bash
-git clone <repo-url> ai-executive-os
-cd ai-executive-os
+git clone <frontend-repo-url> ai-executive-os-frontend
+cd ai-executive-os-frontend
 
-npm install
-npm run setup
-
-cp backend/.env.example backend/.env.dev
-cp frontend/.env.example frontend/.env.dev
-# Edit both files — same Supabase project, keys from dashboard
-
-cd backend && npm run bootstrap && cd ..
+cp .env.example .env.dev
+# Edit .env.dev — same Supabase project as backend
+pnpm install
 ```
 
-`bootstrap` (backend) starts Docker Postgres, creates the Python venv, runs migrations on **local** `:5433`.
-
-**Frontend-only** (if backend is already set up elsewhere):
+**Backend** (separate repo — see [`ai-executive-os-backend`](https://github.com/alianjum-web/ai-executive-os-backend)):
 
 ```bash
-cd frontend
+git clone <backend-repo-url> ai-executive-os-backend
+cd ai-executive-os-backend
 cp .env.example .env.dev
 # Edit .env.dev
-npm install
+pnpm run bootstrap
 ```
 
 ---
 
 ## Every day — local development
 
-### One command (recommended)
-
-From **repo root** — starts backend (API + Celery + Docker deps) **and** frontend:
+### One command (this folder)
 
 ```bash
-npm run dev
-```
-
-Uses `frontend/.env.dev` and `backend/.env.dev`.
-
-### One command (this folder only)
-
-```bash
-cd frontend
-npm run dev
+pnpm run dev
 ```
 
 Loads `.env.dev` and runs Next.js on **http://localhost:3000**.  
-Backend must already be up (`cd backend && npm run dev` or root `npm run dev`).
+Backend must already be up (run `pnpm run dev` in the backend repo).
 
 ---
 
@@ -132,29 +116,20 @@ Backend must already be up (`cd backend && npm run dev` or root `npm run dev`).
 
 Uses remote Supabase database and production env files (no local Docker Postgres for the API).
 
-### One command (repo root)
+### One command (this folder)
 
 ```bash
-npm run prod
+pnpm run prod
 ```
 
-Uses `frontend/.env.production` and `backend/.env.production`.
-
-### One command (this folder only)
-
-```bash
-cd frontend
-npm run prod
-```
-
-Fill `.env.production` first (see [`../docs/SUPABASE_REMOTE_DATABASE.md`](../docs/SUPABASE_REMOTE_DATABASE.md)).  
+Fill `.env.production` first (see [`backend context/docs/SUPABASE_REMOTE_DATABASE.md`](https://github.com/alianjum-web/ai-executive-os-backend/blob/main/context/docs/SUPABASE_REMOTE_DATABASE.md)).  
 Typical test URL: still **http://localhost:3000** with `NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1` while the backend runs locally against the remote DB.
 
 ### Production build (deploy-style check)
 
 ```bash
-npm run build:prod    # uses .env.production
-npm run start:prod
+pnpm run build:prod    # uses .env.production
+pnpm run start:prod
 ```
 
 ---
@@ -163,7 +138,7 @@ npm run start:prod
 
 | Step | Check |
 |------|--------|
-| 1 | `npm run dev` → http://localhost:3000 loads |
+| 1 | `pnpm run dev` → http://localhost:3000 loads |
 | 2 | Sign in / sign up (Supabase) |
 | 3 | Open **Chat** — message streams (backend :8000 + valid LLM key) |
 | 4 | Open **Knowledge** — upload if `DOCUMENT_UPLOAD_ENABLED` in backend features |
@@ -174,19 +149,19 @@ curl -s http://127.0.0.1:8000/api/v1/health
 
 ---
 
-## npm scripts
+## pnpm scripts
 
 | Command | When to use |
 |---------|-------------|
-| `npm install` | First time in `frontend/` |
-| `npm run dev` | Daily — dev UI with `.env.dev` |
-| `npm run prod` | Daily — prod-like UI with `.env.production` |
-| `npm run build` | Production build (`.env.dev`) |
-| `npm run build:prod` | Production build (`.env.production`) |
-| `npm run start` / `start:prod` | Serve built app |
-| `npm run lint` | ESLint |
-| `npm test` | Jest unit tests |
-| `npm run test:e2e` | Playwright |
+| `pnpm install` | First time in `frontend/` |
+| `pnpm run dev` | Daily — dev UI with `.env.dev` |
+| `pnpm run prod` | Daily — prod-like UI with `.env.production` |
+| `pnpm run build` | Production build (`.env.dev`) |
+| `pnpm run build:prod` | Production build (`.env.production`) |
+| `pnpm run start` / `start:prod` | Serve built app |
+| `pnpm run lint` | ESLint |
+| `pnpm test` | Jest unit tests |
+| `pnpm run test:e2e` | Playwright |
 
 ---
 
@@ -240,7 +215,7 @@ Deeper layout notes: [`src/README.md`](src/README.md) · [`src/common/README.md`
 | [`src/common/services/api/client.ts`](src/common/services/api/client.ts) | Typed fetch to FastAPI |
 | [`src/app/layout.tsx`](src/app/layout.tsx) | Root layout, providers, theme |
 
-Full three-file map (frontend + backend): [`../docs/CORE_FILES.md`](../docs/CORE_FILES.md)
+Full three-file map (frontend + backend): [`backend context/docs/CORE_FILES.md`](https://github.com/alianjum-web/ai-executive-os-backend/blob/main/context/docs/CORE_FILES.md)
 
 ---
 
@@ -260,9 +235,7 @@ Full three-file map (frontend + backend): [`../docs/CORE_FILES.md`](../docs/CORE
 Contracts mirror the backend under [`src/common/types/http/`](src/common/types/http/) (`enums`, `schemas`, `errors`, `stream-events`). HTTP calls go through [`src/common/api/`](src/common/api/) and parse `ApiErrorResponse` on failures.
 
 ```bash
-npm run typecheck              # tsc --noEmit (strict)
-# From repo root:
-npm run typecheck:frontend
+pnpm run typecheck              # tsc --noEmit (strict)
 ```
 
 When you change a backend Pydantic model, update the matching file in `src/common/types/` before merging.
@@ -272,10 +245,10 @@ When you change a backend Pydantic model, update the matching file in `src/commo
 ## Tests and quality
 
 ```bash
-npm run typecheck
-npm run lint
-npm test
-npm run test:e2e   # requires app running; see playwright config
+pnpm run typecheck
+pnpm run lint
+pnpm test
+pnpm run test:e2e   # requires app running; see playwright config
 ```
 
 ---
@@ -284,11 +257,9 @@ npm run test:e2e   # requires app running; see playwright config
 
 | Document | Purpose |
 |----------|---------|
-| [`../README.md`](../README.md) | Monorepo onboarding, cheat sheet, troubleshooting |
-| [`../backend/README.md`](../backend/README.md) | API, Celery, Docker, migrations |
-| [`../docs/PROJECT_MASTER.md`](../docs/PROJECT_MASTER.md) | Engineering spec and conventions |
-| [`../docs/CORE_FILES.md`](../docs/CORE_FILES.md) | Where auth, RAG, and tenant sync live |
-| [`../docs/FEATURE_FLAGS.md`](../docs/FEATURE_FLAGS.md) | Flags served from backend `config/features.json` |
+| [`backend context/docs/PROJECT_MASTER.md`](https://github.com/alianjum-web/ai-executive-os-backend/blob/main/context/docs/PROJECT_MASTER.md) | Engineering spec and conventions |
+| [`backend context/docs/CORE_FILES.md`](https://github.com/alianjum-web/ai-executive-os-backend/blob/main/context/docs/CORE_FILES.md) | Where auth, RAG, and tenant sync live |
+| [`backend context/docs/FEATURE_FLAGS.md`](https://github.com/alianjum-web/ai-executive-os-backend/blob/main/context/docs/FEATURE_FLAGS.md) | Flags served from backend `config/features.json` |
 
 ---
 
@@ -296,9 +267,7 @@ npm run test:e2e   # requires app running; see playwright config
 
 | Goal | Command |
 |------|---------|
-| **First time (full stack)** | Root: `npm install && npm run setup` → copy env files → `cd backend && npm run bootstrap` |
-| **Daily dev (full stack)** | Root: `npm run dev` |
-| **Daily dev (frontend only)** | `cd frontend && npm run dev` |
-| **Prod-like test (full stack)** | Root: `npm run prod` |
-| **Prod-like test (frontend only)** | `cd frontend && npm run prod` |
-| **Typecheck** | `npm run typecheck` (here) or root `npm run typecheck` (backend + frontend) |
+| **First time** | `cp .env.example .env.dev` → edit → `pnpm install` |
+| **Daily dev** | `pnpm run dev` |
+| **Prod-like test** | `pnpm run prod` |
+| **Typecheck** | `pnpm run typecheck` |

@@ -21,6 +21,9 @@ engine = create_async_engine(
     connect_args=_connect_args,
     pool_pre_ping=True,     # <--- Add this to health-check connections
     pool_recycle=300,
+    pool_size=20,           # <--- Increase from default 5 to handle concurrent dashboard requests
+    max_overflow=10,        # <--- Allow burst capacity without exhausting connections
+    pool_timeout=30,        # <--- Wait up to 30s for a connection before failing
 )
 AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 

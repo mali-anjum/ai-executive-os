@@ -3,7 +3,6 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-REPO_ROOT="$(cd "$ROOT/.." && pwd)"
 ENV_FILE="${1:-.env.dev}"
 ENV_PATH="$ROOT/$ENV_FILE"
 
@@ -14,7 +13,8 @@ fi
 
 if ! command -v supabase >/dev/null 2>&1; then
   echo "Supabase CLI not found. Install: https://supabase.com/docs/guides/cli" >&2
-  echo "  npm install -g supabase   OR   npx supabase --version" >&2
+  echo "  corepack enable && corepack prepare pnpm@latest --activate" >&2
+  echo "  pnpm add -g supabase   OR   npx supabase --version" >&2
   exit 1
 fi
 
@@ -39,5 +39,5 @@ fi
 MASKED_URL="$(echo "$DB_URL" | sed -E 's#(://[^:]+:)[^@]+#\1***#')"
 echo "Applying Supabase migrations → $MASKED_URL"
 
-cd "$REPO_ROOT"
+cd "$ROOT"
 supabase db push --db-url "$DB_URL" --yes
