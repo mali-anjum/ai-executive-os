@@ -75,7 +75,7 @@ export function useChat() {
         const raw =
           err instanceof Error ? err.message : "Failed to get a response.";
         const content = raw.toLowerCase().includes("network")
-          ? "Cannot reach the API. Start the backend: `cd backend && npm run prod` (port 8000), then retry."
+          ? "Cannot reach the API. Start the backend: `cd backend && pnpm run prod` (port 8000), then retry."
           : raw;
         dispatch(
           updateAssistantMessage({

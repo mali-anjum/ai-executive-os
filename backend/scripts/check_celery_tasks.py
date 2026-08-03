@@ -20,7 +20,7 @@ def main() -> int:
     if missing:
         print("Celery task registration FAILED. Missing:", ", ".join(missing))
         print("Restart the worker after changing app/tasks/celery_app.py:")
-        print("  cd backend && npm run worker:prod")
+        print("  cd backend && pnpm run worker:prod")
         return 1
     print("Celery tasks OK:", ", ".join(REQUIRED))
     return 0

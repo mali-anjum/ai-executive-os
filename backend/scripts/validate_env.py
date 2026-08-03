@@ -42,7 +42,7 @@ def main() -> int:
 
     print("\nValidation passed.")
     if prod_mode:
-        print("Tip: start with npm run dev, sign in via Supabase, test chat (no X-Org-Id headers).")
+        print("Tip: start with pnpm run dev, sign in via Supabase, test chat (no X-Org-Id headers).")
     return 0
 
 

@@ -14,4 +14,4 @@ types/
 
 HTTP client functions live in **`src/common/api/`** (not `services/api/`).
 
-**Workflow:** change backend `app/models/http/*` → update matching file here → `npm run typecheck`.
+**Workflow:** change backend `app/models/http/*` → update matching file here → `pnpm run typecheck`.

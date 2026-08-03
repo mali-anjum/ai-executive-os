@@ -55,7 +55,7 @@ describe("useDocumentUpload", () => {
       data: [],
       error: {
         status: "FETCH_ERROR",
-        error: "Cannot reach the API. Start the backend (npm run dev or npm run prod in backend/).",
+        error: "Cannot reach the API. Start the backend (pnpm run dev or pnpm run prod in backend/).",
       },
       isLoading: false,
       isFetching: false,

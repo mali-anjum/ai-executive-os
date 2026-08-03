@@ -76,7 +76,7 @@ export async function fetchWithTimeout(
     }
     if (e instanceof TypeError) {
       throw new Error(
-        "Cannot reach the API. Start the backend (npm run dev or npm run prod in backend/)."
+        "Cannot reach the API. Start the backend (pnpm run dev or pnpm run prod in backend/)."
       );
     }
     throw e;

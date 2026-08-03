@@ -114,7 +114,7 @@ export function useQueryStream() {
         }
         if (streamErr instanceof TypeError) {
           throw new Error(
-            "Lost connection to the API. Keep `npm run prod` running in backend/ and retry."
+            "Lost connection to the API. Keep `pnpm run prod` running in backend/ and retry."
           );
         }
         throw streamErr;

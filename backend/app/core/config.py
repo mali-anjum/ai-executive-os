@@ -1,5 +1,5 @@
 """
-Central config — which file loads is ENV_FILE (npm run dev vs prod).
+Central config — which file loads is ENV_FILE (pnpm run dev vs prod).
 
 Wires Postgres, Redis, LLM keys, Slack secrets, CORS, and feature env overrides.
 Nothing in the app reads os.environ directly except this module.

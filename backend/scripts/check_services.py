@@ -5,7 +5,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-# Allow `npm run db:check` from backend/ (same layout as uvicorn).
+# Allow `pnpm run db:check` from backend/ (same layout as uvicorn).
 _ROOT = Path(__file__).resolve().parents[1]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
@@ -58,7 +58,7 @@ def main() -> int:
                 "  (copy SUPABASE_* / ENCRYPTION_KEY / GEMINI_* from .env.production)",
                 file=sys.stderr,
             )
-            print("  npm run deps:docker:all && npm run dev:prod:local", file=sys.stderr)
+            print("  pnpm run deps:docker:all && pnpm run dev:prod:local", file=sys.stderr)
             print(
                 "Or fix remote URL: Supabase Dashboard → Database → Session pooler URI (port 6543).",
                 file=sys.stderr,
@@ -69,7 +69,7 @@ def main() -> int:
                 file=sys.stderr,
             )
             print(
-                "  Run: npm run verify:supabase  (refs must match)",
+                "  Run: pnpm run verify:supabase  (refs must match)",
                 file=sys.stderr,
             )
             print(
@@ -87,7 +87,7 @@ def main() -> int:
             )
         else:
             print(
-                "\nFix: npm run deps:docker (local) or npm run dev:prod:local — see docs/DEV_VS_PRODUCTION.md",
+                "\nFix: pnpm run deps:docker (local) or pnpm run dev:prod:local — see docs/DEV_VS_PRODUCTION.md",
                 file=sys.stderr,
             )
         return 1
@@ -100,7 +100,7 @@ def main() -> int:
         client.ping()
     except Exception as exc:
         print("\nRedis check failed:", exc, file=sys.stderr)
-        print("\nFix: npm run deps:docker  or set REDIS_URL in backend/.env", file=sys.stderr)
+        print("\nFix: pnpm run deps:docker  or set REDIS_URL in backend/.env", file=sys.stderr)
         return 1
 
     print("Postgres and Redis OK.")
