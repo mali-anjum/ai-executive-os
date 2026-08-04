@@ -45,7 +45,7 @@
   "devDependencies": {
     "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
-    "@testing-library/jest-dom": "^6.6.0",
+    "@testing-library/jest-dom": "^7.0.0",
     "@testing-library/react": "^16.2.0",
     "@types/jest": "^29.5.14",
     "@types/node": "^20",
