@@ -76,24 +76,34 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Pull Vercel environment
-        uses: amondnet/vercel-action@v25
+      - uses: pnpm/action-setup@v4
         with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: .
-          scope: ${{ secrets.VERCEL_ORG_ID }}
+          version: 11.17.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Link project to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+        run: >-
+          pnpm dlx vercel@58.5.1 link
+          --yes
+          --project ai-executive-os
+          --scope "$VERCEL_ORG_ID"
+          --token "$VERCEL_TOKEN"
 
       - name: Deploy to Vercel (production)
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: .
-          vercel-args: "--prod"
-          scope: ${{ secrets.VERCEL_ORG_ID }}
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+        run: pnpm dlx vercel@58.5.1 deploy --prod --yes --token "$VERCEL_TOKEN"
 
   e2e-smoke:
     name: E2E — smoke tests (optional)
