@@ -14,7 +14,8 @@
 export function getRolePermissions(role?: string | null) {
   const normalizedRole = role ?? "employee";
 
-  const isAdmin = normalizedRole === "admin";
+  const isOwner = normalizedRole === "owner";
+  const isAdmin = isOwner || normalizedRole === "admin";
   const isManager = normalizedRole === "manager";
 
   return {

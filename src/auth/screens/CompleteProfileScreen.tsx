@@ -7,6 +7,7 @@ import { Input } from "@/common/atoms/Input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/common/atoms/ui/card";
 import { AuthShell } from "@/auth/organisms/AuthShell";
 import { authService } from "@/auth/services";
+import { buildOrganizationMetadata } from "@/common/tenancy";
 
 export function CompleteProfileScreen() {
   const router = useRouter();
@@ -20,12 +21,12 @@ export function CompleteProfileScreen() {
     setBusy(true);
     setError(null);
     try {
-      const orgId = crypto.randomUUID();
-      const { error: updateError } = await authService.updateUserMetadata({
-        org_id: orgId,
-        org_name: orgName.trim(),
-        role: "admin",
-      });
+      const { error: updateError } = await authService.updateUserMetadata(
+        buildOrganizationMetadata({
+          orgName: orgName.trim(),
+          role: "owner",
+        })
+      );
       if (updateError) throw updateError;
       router.push("/dashboard");
       router.refresh();

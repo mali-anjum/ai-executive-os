@@ -14,6 +14,7 @@ import {
   type SignupFormValues,
 } from "@/auth/services/form-resolvers";
 import { useFeatureFlag } from "@/common/hooks/useFeatureFlag";
+import { buildOrganizationMetadata } from "@/common/tenancy";
 
 export function SignupScreen() {
   const authEnabled = useFeatureFlag("BASIC_AUTH_ENABLED");
@@ -37,12 +38,11 @@ export function SignupScreen() {
       const { error: signUpError } = await authService.signUp({
         email: data.email,
         password: data.password,
-        metadata: {
-          org_id: crypto.randomUUID(),
-          org_name: data.orgName,
-          full_name: data.fullName,
-          role: "admin",
-        },
+        metadata: buildOrganizationMetadata({
+          orgName: data.orgName,
+          fullName: data.fullName,
+          role: "owner",
+        }),
       });
       if (signUpError) throw signUpError;
       setSuccessMessage(

@@ -27,6 +27,7 @@ Holds anything **reused across 2+ features**:
 - `state/slices/` — ui, user, org
 - `store/` — root Redux store composition
 - `services/` — Supabase + API client
+- `tenancy/` — multi-tenancy domain (org + membership types, boundary guards, `useTenant`, org-creation service)
 - `lib/` — `utils`, `theme`, `navigation`, `palette` (no Redux)
 - `config/` — `features.config.ts`
 
