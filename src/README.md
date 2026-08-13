@@ -23,12 +23,12 @@ Holds anything **reused across 2+ features**:
 - `atoms/` — shared primitives + `atoms/ui/` (shadcn)
 - `molecules/` — `ErrorState`, `EmptyState`, `LoadingBlock`, …
 - `organisms/` — layout shell, `DashboardTemplate`, `RoleGuard`, providers
-- `hooks/` — theme, user, org, sidebar, feature flags
+- `hooks/` — theme, user, org, tenant (`useTenant`), sidebar, feature flags
 - `state/slices/` — ui, user, org
 - `store/` — root Redux store composition
 - `services/` — Supabase + API client
-- `tenancy/` — multi-tenancy domain (org + membership types, boundary guards, `useTenant`, org-creation service)
-- `lib/` — `utils`, `theme`, `navigation`, `palette` (no Redux)
+- `lib/` — `utils`, `theme`, `navigation`, `palette`, tenant helpers (no Redux)
+- `types/` — `tenancy.ts` + `http/*` domain types
 - `config/` — `features.config.ts`
 
 ## Other top-level folders

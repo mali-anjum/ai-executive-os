@@ -1,9 +1,11 @@
 /**
  * Core multi-tenancy domain types (pure, framework-agnostic).
  *
- * These mirror the server-side / database-side model (organizations +
- * organization_members). Keep them in sync with
- * `supabase/migrations/0001_multi_tenancy.sql`.
+ * These mirror the server-side / database-side model owned by the backend:
+ * `ai-executive-os-backend/supabase/migrations/` — specifically
+ * `20260603000002_organizations_multitenant.sql` (organizations + org scope)
+ * and `20260603000007_row_level_security.sql` (RLS via `auth_org_id()` /
+ * `auth_user_role()`). Keep these in sync with that migration series.
  */
 
 export const ORG_ROLES = ["owner", "admin", "manager", "employee"] as const;

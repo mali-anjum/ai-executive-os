@@ -7,7 +7,7 @@ import { Input } from "@/common/atoms/Input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/common/atoms/ui/card";
 import { AuthShell } from "@/auth/organisms/AuthShell";
 import { authService } from "@/auth/services";
-import { buildOrganizationMetadata } from "@/common/tenancy";
+import { buildOrganizationMetadata } from "@/common/lib/tenant";
 
 export function CompleteProfileScreen() {
   const router = useRouter();

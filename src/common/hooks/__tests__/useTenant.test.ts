@@ -1,6 +1,6 @@
 import { act } from "@testing-library/react";
 import { renderHookWithStore } from "@/common/store/test-utils";
-import { useTenant } from "@/common/tenancy";
+import { useTenant } from "@/common/hooks/useTenant";
 
 describe("useTenant", () => {
   it("exposes the active tenant and admin flag for an owner", () => {

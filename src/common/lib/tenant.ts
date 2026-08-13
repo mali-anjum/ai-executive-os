@@ -7,7 +7,7 @@ import {
   type OrgRole,
   type TenantContext,
   TenantBoundaryError,
-} from "../types";
+} from "@/common/types/tenancy";
 
 /** Collapse whitespace and trim — canonical display form. */
 export function normalizeOrgName(name: string): string {
@@ -71,4 +71,50 @@ export function isOrgRole(value: unknown): value is OrgRole {
   return (
     typeof value === "string" && (ORG_ROLES as readonly string[]).includes(value)
   );
+}
+
+export type OrganizationMetadata = {
+  org_id: string;
+  org_name: string;
+  org_slug: string;
+  full_name?: string;
+  role: OrgRole;
+};
+
+function createOrgId(): string {
+  return crypto.randomUUID();
+}
+
+/**
+ * Build the auth user-metadata block for a new organization + owner at signup.
+ *
+ * The backend owns the database schema (see `ai-executive-os-backend/
+ * supabase/migrations/`). Its RLS reads `org_id`/`role` from this metadata via
+ * `auth_org_id()` / `auth_user_role()` to scope the user's tenant access.
+ */
+export function buildOrganizationMetadata(input: {
+  orgName: string;
+  fullName?: string;
+  role?: OrgRole;
+  orgId?: string;
+}): OrganizationMetadata {
+  const normalized = normalizeOrgName(input.orgName);
+  if (!isValidOrgName(normalized)) {
+    throw new Error(
+      "Organization name is required and must be at least 2 characters."
+    );
+  }
+
+  const metadata: OrganizationMetadata = {
+    org_id: input.orgId ?? createOrgId(),
+    org_name: normalized,
+    org_slug: orgSlug(normalized),
+    role: input.role ?? "owner",
+  };
+
+  if (input.fullName?.trim()) {
+    metadata.full_name = input.fullName.trim();
+  }
+
+  return metadata;
 }

@@ -14,7 +14,7 @@ import {
   type SignupFormValues,
 } from "@/auth/services/form-resolvers";
 import { useFeatureFlag } from "@/common/hooks/useFeatureFlag";
-import { buildOrganizationMetadata } from "@/common/tenancy";
+import { buildOrganizationMetadata } from "@/common/lib/tenant";
 
 export function SignupScreen() {
   const authEnabled = useFeatureFlag("BASIC_AUTH_ENABLED");

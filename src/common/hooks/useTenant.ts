@@ -2,8 +2,8 @@
 
 import { useOrg } from "@/common/hooks/useOrg";
 import { useUser } from "@/common/hooks/useUser";
-import { isOrgRole, isSameTenant } from "../tenancy/lib/tenant";
-import type { OrgRole } from "../tenancy/types";
+import { isOrgRole, isSameTenant } from "../lib/tenant";
+import type { OrgRole } from "@/common/types/tenancy";
 
 /**
  * Composer hook exposing the active tenant context and an organization
@@ -14,7 +14,7 @@ export function useTenant() {
   const { orgId, orgName } = useOrg();
   const { role } = useUser();
 
-  const tenantRole: OrgRole = isOrgRole(role) ? role : "employee";
+  const tenantRole: OrgRole = role && isOrgRole(role) ? role : "employee";
 
   /** Whether the signed-in user belongs to the given organization. */
   const canAccess = (targetOrgId: string | null | undefined): boolean =>
