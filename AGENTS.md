@@ -1,6 +1,7 @@
 # Agent Instructions
 
-**Before coding:** Read [docs/PROJECT_MASTER.md](../docs/PROJECT_MASTER.md) (engineering) and [docs/PRODUCT_STRATEGY_AND_ROADMAP.md](../docs/PRODUCT_STRATEGY_AND_ROADMAP.md) (what to build next, RBAC, market position).
+**Before coding:** Read [.agents/AGENTS.md](.agents/AGENTS.md) (frontend base rules), [src/README.md](src/README.md) (module layout), [docs/tenancy/MULTI_TENANCY.md](docs/tenancy/MULTI_TENANCY.md) (tenancy boundaries, backend-owned migrations), and [docs/RTK/rtk polling and visibality polling.md](docs/RTK/rtk%20polling%20and%20visibality%20polling.md) (server-state vs client-state rules). The backend engineering spec lives in the separate `ai-executive-os-backend` repo.
+
 
 **State management:** Use **Redux Toolkit** behind feature hooks (`useSidebar`, `useChat`, etc.). Components must never import `store/` or use `useSelector`/`useDispatch` directly.
 

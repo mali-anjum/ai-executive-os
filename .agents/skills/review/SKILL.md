@@ -1,142 +1,71 @@
 ---
 name: review
-description: After building a feature, verify it matches what was planned, respects the system architecture and design standards, and is ready for production. Reports issues clearly so the developer decides what to fix.
+description: After building a feature in the AI Executive OS frontend, verify it matches the plan, respects this repo's architecture and design standards, and is production ready. Reports issues clearly so the developer decides what to fix.
 ---
 
-Building is not done when the code runs. It is done when the code is correct.
+Building is not done when the code runs. It is done when the code is **correct** — matches the plan and respects this repo's architecture. AI moves fast and drifts: code that works on the surface but violates the module layout, the state rules, tenancy, RBAC, or the design system. This skill catches that before it compounds.
 
-AI moves fast. Fast means things get built that work on the surface but drift from the architecture, violate the design system, or miss edge cases that matter. This skill catches those things before they compound into bigger problems.
-
-Run this after every feature. Before you move on.
-
-## What This Skill Does Not Do
-
-It does not fix anything. It reports what it finds and lets the developer decide what matters and what to do about it. Fixing without understanding is how problems get buried, not solved.
-
----
+This skill does not fix anything. It reports findings and lets the developer decide.
 
 ## Step 1 — Understand What Should Have Been Built
 
-Before reviewing anything, establish the benchmark.
-
-Read in this order:
-
-- The implementation plan from `/architect` if one exists
-- The feature description or task that was given
-- Any relevant context files — architecture boundaries, code standards, design rules
-
-If no plan exists, ask the developer to describe what the feature was supposed to do before reviewing. You cannot verify correctness without knowing what correct looks like.
-
----
+Read in order: the `/architect` plan if one exists, the feature description, and the relevant context (`AGENTS.md`, `src/README.md`, `docs/tenancy/MULTI_TENANCY.md`, `docs/RTK/…`). You cannot verify correctness without knowing what correct looks like. If no plan exists, ask the developer to describe the feature first.
 
 ## Step 2 — Review in Three Layers
 
 ### Layer 1 — Does it match the plan?
 
-Compare what was built against what was planned.
-
-Check:
-
-- Every part of the feature description — is it all there?
-- The decisions made during planning — are they reflected in the code?
-- The scope — did the implementation stay within bounds or add things that were not asked for?
-
-Flag anything that was planned but missing. Flag anything that was built but not planned.
+Compare what was built against what was planned: every part of the feature present? decisions reflected? scope respected?
 
 ### Layer 2 — Does it respect the system?
 
-This is where AI drift most commonly happens. The feature works, but it violates rules that the project depends on.
+Where AI drift most commonly happens. Check this repo's hard rules:
 
-Check:
-
-- **Architecture boundaries** — does code in the right place own the right responsibilities? No UI logic in API routes. No DB calls in components. Whatever the project's boundaries are — are they respected?
-- **Design system** — are the correct tokens, classes, and patterns used? Any hardcoded values that should be variables? Any raw color classes that should use the design system?
-- **Code standards** — naming conventions, file organisation, TypeScript strictness, error handling patterns — do they match what the project established?
-- **Existing patterns** — does this feature introduce a new pattern when an existing one should have been used?
+- **Module layout** — code in the right atomic folder (`atoms/ molecules/ organisms/ screens/ hooks/ state/ services/`); screens only import their module + `@/common/*`; `src/app/` only wires routes to screens.
+- **State ownership** — server-owned data through RTK Query (`src/common/api/endpoints/<domain>.api.ts`), client-owned UI state in Redux slices. No duplicated server data in slices; no `useVisibilityPolling` alongside RTK Query polling for the same endpoint.
+- **Hooks boundary** — no component imports `store/` or uses `useSelector`/`useDispatch` directly; it uses feature hooks (`useChat`, `useTickets`, `useTenant`, `useFeatureFlag`).
+- **Tenancy** — org-aware resources guarded on the client by `useTenant().canAccess`; `X-Org-Id` / `X-User-Role` / `X-User-Id` headers present where needed (`src/auth/services/headers.ts`). Backend migrations/RLS never added here.
+- **RBAC** — role gating via `RoleGuard` / `getRolePermissions`; roles `owner|admin|manager|employee`.
+- **Type mirrors** — backend contract changes reflected in `src/common/types/http/` (`enums`, `schemas`, `errors`, `stream-events`).
+- **Design system** — shadcn tokens in `common/atoms/ui/`; no hardcoded hex/raw color classes that bypass the palette (`common/lib/palette.ts`).
+- **Naming** — PascalCase components/screens, camelCase `use*` hooks and `*Slice`, kebab-case folders, `*.service.ts` / `*.config.ts` for typed non-UI modules.
 
 ### Layer 3 — Is it production ready?
 
-Check:
-
-- Error handling — what happens when things go wrong? Are errors caught and handled or does the feature silently fail?
-- Edge cases — empty states, loading states, missing data — are these handled?
-- Console errors — any errors or warnings in the browser or terminal?
-- Obvious bugs — anything that would clearly break for a real user?
-
----
+- Error handling — failures parsed via `ApiErrorResponse` / `getApiErrorMessage`, not silent.
+- Loading/empty/error states — `LoadingBlock`, `EmptyState`, `ErrorState` used where a screen can be empty or fail.
+- SSE chat — stream events parsed by `parseStreamSseEvent`; `token / error / done` handled, cleanup on unmount.
+- Polling — visibility-aware, no overlapping requests, no duplicate polling.
+- Edge cases — missing data, org boundary, role not allowed.
 
 ## Step 3 — Report What You Found
-
-After completing all three layers, produce a clear report. Do not bury issues. Do not soften them. Report honestly so the developer can make informed decisions.
 
 ```
 ## Review — [Feature Name]
 
 ### Layer 1 — Plan alignment
-[PASS / ISSUES FOUND]
-[List any gaps between what was planned and what was built]
+[PASS / ISSUES FOUND] + list
 
 ### Layer 2 — System integrity
-[PASS / ISSUES FOUND]
-[List any architecture, design, or code standard violations]
+[PASS / ISSUES FOUND] + architecture/design/standard violations
 
 ### Layer 3 — Production readiness
-[PASS / ISSUES FOUND]
-[List any error handling gaps, edge cases, or obvious bugs]
+[PASS / ISSUES FOUND] + error handling / edge cases / obvious bugs
 
 ### Summary
-[X] issues found across [Y] layers.
-
-[If no issues: "No issues found. This feature is ready to ship."]
-[If issues: "Resolve the above before moving to the next feature."]
+[X] issues across [Y] layers. Label each with severity.
 ```
-
----
 
 ## Step 4 — Let the Developer Decide
 
-After presenting the report, stop. Do not start fixing. Do not suggest fixes unless the developer asks.
-
-Wait for the developer to:
-
-- Ask you to fix a specific issue
-- Tell you an issue is intentional and can be ignored
-- Confirm everything is resolved and ready to move on
-
-The developer owns the quality decision. You inform it.
-
----
+Stop after presenting the report. Do not fix anything or suggest fixes unless asked. The developer owns the quality decision; you inform it.
 
 ## Severity Guide
 
-Not all issues are equal. Use this to help the developer prioritise:
-
-**Critical — fix before moving on**
-
-- Architecture boundary violations that will break future features
-- Missing error handling that causes silent failures
-- Functionality that was planned but completely missing
-
-**Important — fix soon**
-
-- Design system drift that will cause UI inconsistency
-- Code standard violations that will compound across the codebase
-- Edge cases that a real user will encounter
-
-**Minor — fix when convenient**
-
-- Naming inconsistencies that do not affect behaviour
-- Missing optimisations
-- Style issues that do not affect the design system
-
-Label each issue with its severity so the developer can triage quickly.
-
----
+- **Critical — fix before moving on:** architecture boundary violations (e.g. store import in a component, server data in a slice, backend migration added to the frontend), missing error handling causing silent failures, planned functionality missing.
+- **Important — fix soon:** design-system drift, naming/standard violations, edge cases real users hit.
+- **Minor — fix when convenient:** non-behavioural inconsistencies, style nits.
 
 ## The Standard
 
-The question this skill answers is not "does it work?"
-
-The question is "is it correct?"
-
-Working and correct are not the same thing. A feature can work today and break the project tomorrow. Review exists to catch the difference.
+The question this skill answers is not "does it work?" — it is "is it correct?" Working and correct are not the same thing. A feature can work today and break the project tomorrow. Review exists to catch the difference before it drifts.
