@@ -112,3 +112,32 @@ Propose the correct approach (correct module layer, use the hook/endpoint, keep 
 ## The Principle
 
 The worst thing you can do when something is broken is keep doing the same thing faster. Diagnose first. Respond correctly — and in this repo, make sure fixes respect the module layout, the state rules, the tenancy boundary, and the type mirrors.
+
+## Hard Rules — Must Never Violate
+
+These are non-negotiable in this repo.
+
+**You must check what already exists before writing anything (no duplicate code).**
+Most "failures" here are actually agents reinventing something that already exists. Before
+writing a single line, confirm the need is not already met:
+
+- Is there already a hook? (`useChat`, `useTickets`, `useAnalytics`, `useDocumentUpload`,
+  `useIntegration`, `useTenant`, `useOrg`, `useUser`, `useRole`, `useFeatureFlag`, …)
+- Is there already an RTK Query endpoint? (`src/common/api/endpoints/`: `connectors`,
+  `dashboard`, `demo`, `evaluation`, `knowledge`, `settings`, `tickets`)
+- Is there already a component? (`common/atoms/`, `common/atoms/ui/`, `common/molecules/`)
+- Is there already a type in `src/common/types/` (incl. `http/*`)?
+
+If yes, **use/extend it**. Writing a second copy is a defect, not a fix.
+
+**No-go list (never do these — common root causes of "Failure Mode 2 / 3"):**
+1. Supabase migrations, schema, or RLS added to this repo — backend-owned only.
+2. Component importing `store/` or using `useSelector`/`useDispatch` directly — use hooks.
+3. Server data copied into a Redux slice — use RTK Query.
+4. A new hook/endpoint/component that duplicates an existing one.
+5. `useVisibilityPolling` + RTK Query `pollingInterval` on the same endpoint.
+6. A backend contract change without updating the matching type mirror in `src/common/types/http/`.
+7. A new UI primitive or raw color that bypasses `common/atoms/ui/` and `lib/palette.ts`.
+8. Multiple attempts at the same defect — after two failed root-cause fixes, re-diagnose
+   (this may be Failure Mode 2 or 3, not Mode 1).
+

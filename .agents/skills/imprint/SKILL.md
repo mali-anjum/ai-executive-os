@@ -66,3 +66,30 @@ Spacing / borders / interactive states: [variations + recommendation]
 ```
 
 Present the audit and wait for confirmation — do not fix anything and do not update `ui-registry.md` yet. After confirmation, write the agreed baseline to `ui-registry.md` labelled `## Baseline — Established [date]`, then list every component that deviates so the developer can fix them systematically.
+
+## Hard Rules — Must Never Violate
+
+**Reuse existing UI before creating new visual patterns (no duplicate components).**
+Before capturing or building anything, check that the needed primitive already exists:
+
+- shadcn primitives in `common/atoms/ui/`: `button`, `badge`, `card`, `input`, `separator`,
+  `skeleton`, `sonner`.
+- Composable atoms in `common/atoms/`: `Button`, `Badge`, `Input`, `Logo`, `LogoMark`,
+  `ThemeToggle`.
+- Molecules in `common/molecules/`: `EmptyState`, `ErrorState`, `LoadingBlock`,
+  `AIProcessingBanner`.
+
+If a component already covers the need, **use it** — do not create a second one and do not
+capture it as a brand-new pattern. This skill exists to keep components consistent, not to
+multiply them.
+
+**Design-system rules:**
+1. Use the tokens and shadcn primitives — no hardcoded hex, no arbitrary/raw Tailwind color
+   classes that bypass `lib/palette.ts` and `lib/theme.ts`.
+2. Standardise on the repo's radius/spacing/text tokens (`bg-card`, `text-muted-foreground`,
+   `rounded-md`/`rounded-lg`, etc.) rather than ad-hoc values.
+3. If the same visual pattern appears in multiple components, register it once in
+   `ui-registry.md` and reference it — never redefine it per component.
+4. Run `/imprint audit` before establishing `ui-registry.md` on this existing codebase, and
+   flag every component that deviates from the agreed baseline.
+

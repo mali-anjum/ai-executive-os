@@ -84,6 +84,9 @@ Blueprint ready.
 ### Where it lives
 - Module folder, layer files, hooks, slice/endpoint names
 
+### Existing blocks reused (proves no duplication)
+- [Names of the existing hooks / RTK endpoints / components / types / tokens this plan reuses — required: if empty, the plan is wrong]
+
 ### Assumptions
 - [Anything not explicitly confirmed]
 
@@ -96,3 +99,40 @@ Present the plan and wait for confirmation. Only after explicit confirmation doe
 ## What This Session Is Not
 
 Not an interrogation, not a spec dump, not open-ended. You align on what matters and get out of the way so building can begin — without drifting from this repo's architecture.
+
+## Hard Rules — Must Never Violate
+
+These are non-negotiable. Any plan that breaks one must be stopped before code is written.
+
+**Check what already exists BEFORE proposing new code (no duplication).**
+The fastest way this repo breaks is an agent writing a *second* implementation of something
+that already exists. Before proposing to build anything, inventory the existing building
+blocks and confirm the need is not already met. Reuse and extend what exists; never create a
+duplicate.
+
+- **Existing feature hooks:** `useChat`, `useQueryStream` (chat); `useAnalytics` (dashboard);
+  `useDocumentUpload`, `useIntegration` (knowledge); `useTickets` (tickets).
+- **Existing common hooks:** `useTenant`, `useOrg`, `useUser`, `useRole`, `useSidebar`,
+  `useTheme`, `useFeatureFlag`, `useMobileNav`, `useVisibilityPolling`.
+- **Existing RTK Query endpoints (`src/common/api/endpoints/`):** `connectors`, `dashboard`,
+  `demo`, `evaluation`, `knowledge`, `settings`, `tickets`.
+- **Existing Redux slices:** `chatSlice`, `analyticsSlice`, `knowledgeSlice`, `ticketSlice`;
+  common `uiSlice`, `orgSlice`, `userSlice`.
+- **Existing UI (reuse, don't make a new one):** `common/atoms/` (`Button`, `Badge`, `Input`,
+  `Logo`, `LogoMark`, `ThemeToggle`) and shadcn `common/atoms/ui/` (`button`, `badge`, `card`,
+  `input`, `separator`, `skeleton`, `sonner`); molecules `EmptyState`, `ErrorState`,
+  `LoadingBlock`, `AIProcessingBanner`.
+- **Rule:** if a hook/endpoint/component/slice already exists for the need, **use it**. Only a
+  plan that explicitly explains why the existing one cannot work may propose a new one.
+
+**No-go list (never plan any of these):**
+1. No Supabase migrations, schema, or RLS in this repo — backend-owned only.
+2. No component importing `store/` or calling `useSelector`/`useDispatch` directly — use hooks.
+3. No server data (documents, tickets, analytics, …) duplicated into a Redux slice — use RTK Query.
+4. No new hook/endpoint/component that duplicates an existing one.
+5. No `useVisibilityPolling` combined with RTK Query `pollingInterval` on the same endpoint.
+6. No new backend contract added without updating the type mirror in `src/common/types/http/`.
+7. No new UI primitive when `common/atoms/ui/` or `common/atoms/` already has one; no
+   hardcoded hex/raw colors that bypass `lib/palette.ts` tokens.
+8. If the backend model changes, the matching type mirror must change in the same plan.
+

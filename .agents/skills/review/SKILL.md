@@ -69,3 +69,32 @@ Stop after presenting the report. Do not fix anything or suggest fixes unless as
 ## The Standard
 
 The question this skill answers is not "does it work?" — it is "is it correct?" Working and correct are not the same thing. A feature can work today and break the project tomorrow. Review exists to catch the difference before it drifts.
+
+## Hard Rules — Must Never Violate (checked in Layer 2)
+
+**No duplicate code — the feature must reuse what already exists.**
+Before accepting a feature, verify it did not reinvent an existing building block. Check
+against the existing inventory:
+
+- Feature hooks: `useChat`, `useQueryStream`, `useAnalytics`, `useDocumentUpload`,
+  `useIntegration`, `useTickets`. Common hooks: `useTenant`, `useOrg`, `useUser`, `useRole`,
+  `useSidebar`, `useTheme`, `useFeatureFlag`, `useMobileNav`, `useVisibilityPolling`.
+- RTK Query endpoints: `src/common/api/endpoints/` (`connectors`, `dashboard`, `demo`,
+  `evaluation`, `knowledge`, `settings`, `tickets`).
+- Redux slices: `chatSlice`, `analyticsSlice`, `knowledgeSlice`, `ticketSlice`; common
+  `uiSlice`, `orgSlice`, `userSlice`.
+- UI: `common/atoms/` + `common/atoms/ui/` + `common/molecules/`.
+- Types: `src/common/types/` incl. `http/{enums,schemas,errors,stream-events}`.
+
+If the feature created a second hook/endpoint/component/slice when one already existed, flag
+as **Critical**.
+
+**Golden-rule violations to flag (all Critical):**
+1. Backend migrations/schema/RLS added to this repo (backend-owned only).
+2. Component importing `store/` or using `useSelector`/`useDispatch` directly (hooks only).
+3. Server data duplicated into a Redux slice (RTK Query only).
+4. `useVisibilityPolling` + RTK Query `pollingInterval` on the same endpoint.
+5. Backend contract change without updating the matching type mirror.
+6. New UI primitive / raw color bypassing `common/atoms/ui/` and `lib/palette.ts`.
+7. A backend model that changed but its type mirror in `src/common/types/http/` was not updated.
+

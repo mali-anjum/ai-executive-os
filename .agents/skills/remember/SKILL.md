@@ -99,3 +99,31 @@ Do not start building until the developer confirms. If memory is missing importa
 ## The Rule
 
 Every session ends with `/remember save`. Every session starts with `/remember restore`. Consistent use is the whole system — a skill used sometimes is a skill that cannot be relied on.
+
+## Hard Rules — Must Never Violate
+
+**Capture what already exists so the next session reuses it (no duplication).**
+The #1 way this repo drifts is the agent forgetting what already exists and writing a
+duplicate hook, endpoint, component, or slice. Your memory is the antidote to that.
+
+In "What was built" and "Current state", explicitly record the **existing** building blocks
+relevant to this work so the next session does not reinvent them:
+
+- Feature hooks: `useChat`, `useQueryStream`, `useAnalytics`, `useDocumentUpload`,
+  `useIntegration`, `useTickets`.
+- Common hooks: `useTenant`, `useOrg`, `useUser`, `useRole`, `useSidebar`, `useTheme`,
+  `useFeatureFlag`, `useMobileNav`, `useVisibilityPolling`.
+- RTK Query endpoints: `src/common/api/endpoints/` (`connectors`, `dashboard`, `demo`,
+  `evaluation`, `knowledge`, `settings`, `tickets`).
+- Redux slices: `chatSlice`, `analyticsSlice`, `knowledgeSlice`, `ticketSlice`, and common
+  `uiSlice`, `orgSlice`, `userSlice`.
+- UI to reuse: `common/atoms/` + `common/atoms/ui/` + `common/molecules/`.
+- Type mirrors: `src/common/types/` incl. `http/{enums,schemas,errors,stream-events}`.
+
+Prompts to always answer in saved memory: "Did we reuse an existing hook/endpoint/component
+or create a new one? What already existed and must not be duplicated next time?"
+
+**Never persist secrets** — env files (`.env.dev`, `.env.production`, `.env.local`) hold real
+credentials; redact or omit anything credential-like. No migrations, no direct `store/`
+imports, no server data in slices — these are hard rules the next session must inherit.
+
