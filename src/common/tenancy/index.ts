@@ -18,4 +18,4 @@ export {
 
 export { buildOrganizationMetadata, type OrganizationMetadata } from "./services/tenancy.service";
 
-export { useTenant } from "./hooks/useTenant";
+export { useTenant } from "../hooks/useTenant";

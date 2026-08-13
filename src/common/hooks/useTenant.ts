@@ -2,8 +2,8 @@
 
 import { useOrg } from "@/common/hooks/useOrg";
 import { useUser } from "@/common/hooks/useUser";
-import { isOrgRole, isSameTenant } from "../lib/tenant";
-import type { OrgRole } from "../types";
+import { isOrgRole, isSameTenant } from "../tenancy/lib/tenant";
+import type { OrgRole } from "../tenancy/types";
 
 /**
  * Composer hook exposing the active tenant context and an organization
