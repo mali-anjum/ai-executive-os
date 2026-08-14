@@ -1,7 +1,18 @@
 /** Mirrors backend `app/models/enums.py` — keep in sync with API Literal types. */
 
 export type AiProviderId = "openai" | "anthropic" | "gemini" | "groq";
-export type UserRole = "admin" | "manager" | "employee";
+export type UserRole = "owner" | "admin" | "manager" | "employee";
+export type InvitationStatus = "pending" | "accepted" | "revoked" | "expired";
+export const INVITATION_STATUSES: readonly InvitationStatus[] = [
+  "pending",
+  "accepted",
+  "revoked",
+  "expired",
+] as const;
+
+export function isInvitationStatus(value: string): value is InvitationStatus {
+  return (INVITATION_STATUSES as readonly string[]).includes(value);
+}
 export type DocumentStatus = "pending" | "processing" | "ready" | "error";
 export type TicketStatus =
   | "open"

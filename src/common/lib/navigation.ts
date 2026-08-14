@@ -4,7 +4,9 @@ import {
   BookOpen,
   LayoutDashboard,
   MessageSquare,
+  Settings,
   Ticket,
+  Users,
 } from "lucide-react";
 import type { FeatureFlag } from "@/common/config";
 
@@ -58,5 +60,21 @@ export const secondaryNav: NavItem[] = [
     icon: BarChart3,
     flag: "ANALYTICS_DASHBOARD_ENABLED",
     leadershipOnly: true,
+  },
+  {
+    href: "/team",
+    label: "Team",
+    description: "Members & invitations",
+    icon: Users,
+    flag: "ORG_MANAGEMENT_ENABLED",
+    adminOnly: true,
+  },
+  {
+    href: "/settings",
+    label: "Organization settings",
+    description: "Workspace details",
+    icon: Settings,
+    flag: "ORG_MANAGEMENT_ENABLED",
+    adminOnly: true,
   },
 ];

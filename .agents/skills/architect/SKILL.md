@@ -135,4 +135,10 @@ duplicate.
 7. No new UI primitive when `common/atoms/ui/` or `common/atoms/` already has one; no
    hardcoded hex/raw colors that bypass `lib/palette.ts` tokens.
 8. If the backend model changes, the matching type mirror must change in the same plan.
+9. **Org-layer CRUD on a Redux slice or RTK Query endpoint.** Rows governed by
+   RLS (organizations, users.org_id/role, organization_invitations, org settings)
+   are fetched/mutated via **supabase-js (PostgREST + RLS)**, not RTK Query and
+   never a Redux slice. The only FastAPI escape hatch is the invitation-accept
+   RPC (`accept_org_invitation`). All other server secrets/LLM/external calls
+   (knowledge, tickets, analytics) stay RTK Query → FastAPI.
 

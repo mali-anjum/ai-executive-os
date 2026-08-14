@@ -140,4 +140,8 @@ If yes, **use/extend it**. Writing a second copy is a defect, not a fix.
 7. A new UI primitive or raw color that bypasses `common/atoms/ui/` and `lib/palette.ts`.
 8. Multiple attempts at the same defect — after two failed root-cause fixes, re-diagnose
    (this may be Failure Mode 2 or 3, not Mode 1).
+9. **RTK Query / Redux for org rows** (organizations, users.org_id/role,
+   organization_invitations, org settings) — these are RLS-governed, so fetch/
+   mutate them via **supabase-js (PostgREST + RLS)**; FastAPI is only for the
+   invitation-accept RPC and for all secrets/LLM/external calls.
 

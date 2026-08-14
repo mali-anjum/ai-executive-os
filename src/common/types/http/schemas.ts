@@ -2,6 +2,7 @@
 
 import type {
   DocumentStatus,
+  InvitationStatus,
   TicketSource,
   TicketStatus,
   UserRole,
@@ -173,4 +174,73 @@ export type UserProfile = {
   org_id?: string | null;
   department?: string | null;
   avatar_url?: string | null;
+};
+
+// ---------------------------------------------------------------------------
+// Sprint 4 — Organization / multi-tenant onboarding (mirrors schemas.py)
+// ---------------------------------------------------------------------------
+
+export type OrganizationRecord = {
+  id: string;
+  name: string;
+  slug?: string | null;
+  plan?: string;
+  industry?: string | null;
+  logo_url?: string | null;
+  website?: string | null;
+  timezone?: string;
+  settings_json?: Record<string, unknown> | null;
+  created_at: string;
+};
+
+export type OrgContext = {
+  org: OrganizationRecord;
+  role: UserRole;
+  onboarding_completed: boolean;
+};
+
+export type OrgUpdateRequest = {
+  name?: string;
+  industry?: string;
+  website?: string;
+  timezone?: string;
+  logo_url?: string;
+};
+
+export type MemberRecord = {
+  id: string;
+  email: string;
+  full_name?: string | null;
+  job_title?: string | null;
+  role: UserRole;
+  department?: string | null;
+  org_id: string;
+  created_at: string;
+};
+
+export type InvitationCreateRequest = {
+  email: string;
+  role: UserRole;
+  department?: string | null;
+  expires_in_days?: number;
+};
+
+export type InvitationRecord = {
+  id: string;
+  org_id: string;
+  email: string;
+  role: UserRole;
+  department?: string | null;
+  status: InvitationStatus;
+  expires_at: string;
+  invited_by?: string | null;
+  accepted_at?: string | null;
+  created_at: string;
+};
+
+export type AcceptInvitationResponse = {
+  org_id: string;
+  org_name: string;
+  org_slug?: string | null;
+  role: UserRole;
 };

@@ -16,6 +16,7 @@ function useNavVisibility() {
   const knowledge = useFeatureFlag("KNOWLEDGE_AGENT_ENABLED");
   const project = useFeatureFlag("PROJECT_AGENT_ENABLED");
   const analytics = useFeatureFlag("ANALYTICS_DASHBOARD_ENABLED");
+  const orgManagement = useFeatureFlag("ORG_MANAGEMENT_ENABLED");
 
   const flagEnabled = (flag?: NavItem["flag"]) => {
     if (!flag) return true;
@@ -23,6 +24,7 @@ function useNavVisibility() {
     if (flag === "KNOWLEDGE_AGENT_ENABLED") return knowledge;
     if (flag === "PROJECT_AGENT_ENABLED") return project;
     if (flag === "ANALYTICS_DASHBOARD_ENABLED") return analytics;
+    if (flag === "ORG_MANAGEMENT_ENABLED") return orgManagement;
     return true;
   };
 
