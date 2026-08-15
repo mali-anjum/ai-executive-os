@@ -32,6 +32,8 @@ This project has its own vocabulary. Confirm 3-5 domain terms before discussing 
 
 - **Tenant / organization** — the org boundary (`org_id`); every tenant-owned resource belongs to one org. Client guard is `useTenant().canAccess`; authoritative enforcement is backend RLS. Is that what you mean?
 - **Server-owned vs client-owned state** — server data (documents, tickets, analytics) goes in RTK Query; UI/theme/filter/sidebar state goes in Redux slices. Which bucket does the new feature fall in?
+- **Core Boundary Principle:** Supabase owns simple data/auth/tenant operations that can be safely enforced with Postgres/RLS. FastAPI owns application intelligence, AI agents, computation, privileged workflows, and integrations.
+
 - **Type mirror** — the frontend copy of a backend Pydantic model under `src/common/types/http/`. If the backend model changes, the mirror must be updated too.
 - **RBAC role** — `owner | admin | manager | employee`; `getRolePermissions` and `RoleGuard` define what a role can see.
 - **Feature flag** — a `FEATURE_FLAGS` key; toggle a feature on/off instead of shipping it half-hidden.
