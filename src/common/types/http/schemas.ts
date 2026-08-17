@@ -193,20 +193,6 @@ export type OrganizationRecord = {
   created_at: string;
 };
 
-export type OrgContext = {
-  org: OrganizationRecord;
-  role: UserRole;
-  onboarding_completed: boolean;
-};
-
-export type OrgUpdateRequest = {
-  name?: string;
-  industry?: string;
-  website?: string;
-  timezone?: string;
-  logo_url?: string;
-};
-
 export type MemberRecord = {
   id: string;
   email: string;
@@ -236,11 +222,4 @@ export type InvitationRecord = {
   invited_by?: string | null;
   accepted_at?: string | null;
   created_at: string;
-};
-
-export type AcceptInvitationResponse = {
-  org_id: string;
-  org_name: string;
-  org_slug?: string | null;
-  role: UserRole;
 };
