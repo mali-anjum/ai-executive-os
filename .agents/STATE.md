@@ -20,9 +20,10 @@
   - `molecules/InviteMembersForm.tsx`, `molecules/InvitationList.tsx`,
     `molecules/MemberList.tsx`; `organisms/AcceptInvitationCard.tsx`.
   - `services/invitation-validation.ts` (+ test) — pure mirror of backend RBAC.
-- **RTK Query** — `src/common/api/endpoints/org.api.ts` (org context/settings/
-  onboarding/members/invitations/accept). Tags `ORG`, `MEMBERS`, `INVITATIONS`
-  in `src/common/api/tags.ts`.
+- **Org data access is Supabase-native** — `src/org/` hooks (`useOrgData`,
+  `useTeam`, `useAcceptInvitation`) call supabase-js (PostgREST + RLS) directly.
+  The RTK Query `org.api.ts` and `ORG`/`MEMBERS`/`INVITATIONS` tags were removed
+  (org CRUD is RLS-governed, never RTK Query).
 - **Type mirrors** — `UserRole` gained `owner`; `InvitationStatus` added in
   `src/common/types/http/enums.ts`; org/invitation/member/settings types added in
   `src/common/types/http/schemas.ts` (kept in sync with backend `schemas.py`).
@@ -35,18 +36,17 @@
 - **Flag** — `ORG_MANAGEMENT_ENABLED` in `src/common/config/features.config.ts`.
 
 ### Current state flags
-- **All Sprint 4 frontend changes are UNCOMMITTED.**
-- **DECISION (2026-08-14): Hybrid.** The org layer is Supabase-native: org
-  context/members/invitations/settings/onboarding are read+written via
-  **supabase-js (PostgREST + RLS)**; `POST /invitations/accept` calls the
-  `accept_org_invitation()` SECURITY DEFINER RPC, then the client syncs
-  `user_metadata` (what RLS reads). FastAPI stays for knowledge/RAG, tickets,
-  analytics, integrations only.
-- Backend migration `0009` + `0010` not yet applied → org screens 404 until
-  `db:migrate` runs (see backend repo STATE.md). Until then, `org.api.ts` still
-  targets the FastAPI endpoints as a working reference.
-- After `0010` is applied, repoint `src/org/` to supabase-js and delete the
-  FastAPI org endpoints (`orgs.py`, `organization_service.py`) from the backend.
+- **All Sprint 4 changes are UNCOMMITTED.**
+- **DECISION (2026-08-14): Supabase-native org layer.** Org context/members/
+  invitations/settings/onboarding are read+written via **supabase-js
+  (PostgREST + RLS)**; invitation accept calls the `accept_org_invitation()`
+  SECURITY DEFINER RPC via `supa.rpc`, then the client syncs `user_metadata`
+  (what RLS reads). FastAPI stays for knowledge/RAG, tickets, analytics,
+  integrations only.
+- **Migration applied in code:** FastAPI org endpoints (`orgs.py`,
+  `organization_service.py`) + frontend `org.api.ts` + org tags/types were
+  removed; `src/org/` hooks talk to Supabase directly. Backend migrations
+  `0009` + `0010` still need `pnpm run db:migrate` to be applied to a running DB.
 
 ## Sprint Ledger (append-only, condensed — newest on top)
 
@@ -75,7 +75,7 @@
   visibility only — authoritative enforcement is backend `require_admin` + RLS).
   Roles: owner > admin > manager > employee; owner treated as admin in
   `getRolePermissions`.
-- Invitation accept: client calls `POST /invitations/accept`, then
+- Invitation accept: client calls `supa.rpc("accept_org_invitation", …)`, then
   `authService.updateUserMetadata({org_id, org_name, org_slug, role})` so RLS
   (`auth_org_id()`/`auth_user_role()`) reads the new tenant. Always sync
   `user_metadata` after accept; never trust a frontend-supplied org id.
@@ -84,24 +84,22 @@
   update both together and run `tsc --noEmit`.
 - Design system: shadcn primitives in `common/atoms/ui/` + tokens in
   `common/lib/palette.ts`/`theme.ts`; no raw hex / ad-hoc classes.
-- **DECISION (2026-08-14) — Supabase-native org layer (Hybrid).** Org
+- **DECISION (2026-08-14) — Supabase-native org layer.** Org
   context/members/invitations/settings/onboarding are read+written via
   **supabase-js (PostgREST + RLS)** directly — never duplicated into a Redux
-  slice and never a second FastAPI endpoint. `POST /invitations/accept` is the
-  one FastAPI escape hatch that calls the `accept_org_invitation()` SECURITY
-  DEFINER RPC (a client must never set its own `org_id`/`role`); the RPC returns
-  the resulting org/role and the client immediately syncs `user_metadata` so RLS
-  picks it up. FastAPI keeps only LLM/RAG/tickets/analytics/integrations. One
-  row-level authority (RLS) protects every org-owned row.
+  slice and never a second FastAPI endpoint. Invitation accept calls the
+  `accept_org_invitation()` SECURITY DEFINER RPC via `supa.rpc` (a client must
+  never set its own `org_id`/`role`); the RPC returns the resulting org/role and
+  the client immediately syncs `user_metadata` so RLS picks it up. FastAPI keeps
+  only LLM/RAG/tickets/analytics/integrations. One row-level authority (RLS)
+  protects every org-owned row.
 
 ## Next session starts with
-1. Apply backend migrations `0009` + `0010` (`pnpm run db:migrate`).
-2. Repoint `src/org/` to supabase-js (supabase client) for org/members/invites
-   and confirm `0010` `accept_org_invitation()` RPC works end-to-end.
-3. Delete the FastAPI org endpoints (`orgs.py`, `organization_service.py`) and
-   their org schemas/model/tests from the backend → removes the duplicate path.
-4. Confirm `src/common/types/http/` mirrors match the trimmed backend
-   `app/models/http/schemas.py` and run `tsc --noEmit` + jest.
+1. Apply backend migrations `0009` + `0010` (`pnpm run db:migrate`) and verify
+   `handle_new_user` (signup bootstrap) + `accept_org_invitation()` RPC.
+2. Wire the invitation-accept entry point (invite link/token → target org): the
+   RPC needs the invited org's id, but a new user cannot read invitations via
+   RLS (no org yet). Resolve via invite token/link before calling `supa.rpc`.
 
 ## Open questions
 - (Resolved) FastAPI org endpoints vs Supabase-native org layer → **Supabase-native.**
