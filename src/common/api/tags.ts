@@ -12,6 +12,8 @@ export const API_TAGS = {
   DEMO: "demo",
   CONNECTORS: "connectors",
   FEEDBACK: "feedback",
+  ORG: "org",
+  TEAM: "team",
 } as const;
 
 export type ApiTag = (typeof API_TAGS)[keyof typeof API_TAGS];

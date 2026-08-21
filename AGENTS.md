@@ -7,8 +7,9 @@ Supabase). Read this file first and comply with every rule below — never write
 code that violates these boundaries.
 
 **Before coding:** Read [src/README.md](src/README.md) (module layout),
-[docs/tenancy/MULTI_TENANCY.md](docs/tenancy/MULTI_TENANCY.md) (tenancy
-boundaries, backend-owned migrations), and
+[.agents/STATE.md](.agents/STATE.md) (the living state file — always read first,
+via `/remember restore`), [docs/tenancy/MULTI_TENANCY.md](docs/tenancy/MULTI_TENANCY.md)
+(tenancy boundaries, backend-owned migrations), and
 [docs/RTK/rtk polling and visibality polling.md](docs/RTK/rtk%20polling%20and%20visibality%20polling.md)
 (server-state vs client-state rules). The backend engineering spec lives in the
 separate `ai-executive-os-backend` repo.
@@ -23,7 +24,9 @@ separate `ai-executive-os-backend` repo.
 3. **State ownership:** *server-owned data → RTK Query* (endpoints under
    `src/common/api/endpoints/`); *client-owned UI state → Redux slice*. Never
    duplicate server data into a slice, and never combine RTK Query polling with
-   `useVisibilityPolling` for the same endpoint.
+   `useVisibilityPolling` for the same endpoint. Supabase-backed server data
+   (org/team, RLS-governed) is **still RTK Query** — use `queryFn` endpoints
+   like `endpoints/org.api.ts`, never raw `createClient()` inside a hook.
 4. **Type mirrors:** `src/common/types/http/` (`enums`, `schemas`, `errors`,
    `stream-events`) mirrors backend Pydantic models. When a backend model changes,
    update the mirror and run `pnpm run typecheck`.

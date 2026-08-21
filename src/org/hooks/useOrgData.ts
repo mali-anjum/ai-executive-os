@@ -1,100 +1,62 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useCallback } from "react";
 import { useFeatureFlag } from "@/common/hooks/useFeatureFlag";
+import {
+  useGetOrganizationContextQuery,
+  useUpdateOrganizationMutation,
+  useCompleteOnboardingMutation,
+} from "@/common/api/endpoints/org.api";
 import type { OrganizationRecord } from "@/common/types";
-import { organizationService } from "../services/OrganizationService"; 
+
+/**
+ * Organization context + settings for the authenticated user.
+ *
+ * Server-owned org data flows through RTK Query (see `endpoints/org.api.ts`),
+ * which reads Supabase directly — no FastAPI org CRUD. RLS remains the
+ * authoritative authorization boundary.
+ */
 export function useOrgData() {
   const enabled = useFeatureFlag("ORG_MANAGEMENT_ENABLED");
 
-  const [org, setOrg] = useState<OrganizationRecord | null>(null);
-  const [role, setRole] = useState("employee");
-  const [onboardingCompleted, setOnboardingCompleted] =
-    useState(false);
+  const {
+    data: context,
+    isLoading,
+    isFetching,
+    refetch,
+  } = useGetOrganizationContextQuery(undefined, { skip: !enabled });
 
-  const [isLoading, setIsLoading] = useState(enabled);
-  const [isFetching, setIsFetching] = useState(false);
+  const [updateOrganization, { isLoading: isSaving }] =
+    useUpdateOrganizationMutation();
+  const [completeOnboarding, { isLoading: isCompleting }] =
+    useCompleteOnboardingMutation();
 
-  // Load org context on mount (and when the feature flag flips). State updates
-  // happen inside the promise callbacks — never synchronously in the effect body
-  // (same pattern as useTeam) to avoid cascading renders.
-  useEffect(() => {
-    if (!enabled) {
-      return;
-    }
+  const org = context?.org ?? null;
+  const role = context?.role ?? "employee";
+  const onboardingCompleted = context?.onboardingCompleted ?? false;
 
-    let cancelled = false;
+  const refresh = useCallback(() => {
+    void refetch();
+  }, [refetch]);
 
-    organizationService.getOrganizationContext()
-      .then((context) => {
-        if (cancelled) return;
-        setOrg(context.org);
-        setRole(context.role);
-        setOnboardingCompleted(context.onboardingCompleted);
-      })
-      .catch(() => {
-        // Initial load failed — org stays null; the screen renders its
-        // loading/empty state instead of an unhandled rejection.
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setIsFetching(false);
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [enabled]);
-
-  const refresh = React.useCallback(async () => {
-    setIsFetching(true);
-    try {
-      const context = await organizationService.getOrganizationContext();
-      setOrg(context.org);
-      setRole(context.role);
-      setOnboardingCompleted(context.onboardingCompleted);
-    } finally {
-      setIsFetching(false);
-      setIsLoading(false);
-    }
-  }, []);
-
-  const saveOrg = React.useCallback(
+  const saveOrg = useCallback(
     async (body: Partial<OrganizationRecord>) => {
       if (!org?.id) {
         throw new Error("Organization not found");
       }
-
-      setIsFetching(true);
-
-      try {
-        const updatedOrg = await organizationService.updateOrganization(org.id, body);
-        setOrg(updatedOrg);
-      } finally {
-        setIsFetching(false);
-      }
+      await updateOrganization({ orgId: org.id, body }).unwrap();
     },
-    [org?.id],
+    [org, updateOrganization],
   );
 
-  const finishOnboarding = React.useCallback(
+  const finishOnboarding = useCallback(
     async (step?: string) => {
       if (!org?.id) {
         throw new Error("Organization not found");
       }
-
-      setIsFetching(true);
-
-      try {
-        await organizationService.completeOnboarding(org.id, step);
-        setOnboardingCompleted(true);
-      } finally {
-        setIsFetching(false);
-      }
+      await completeOnboarding({ orgId: org.id, step }).unwrap();
     },
-    [org?.id],
+    [org, completeOnboarding],
   );
 
   return {
@@ -102,7 +64,7 @@ export function useOrgData() {
     role,
     onboardingCompleted,
     isLoading,
-    isFetching,
+    isFetching: isFetching || isSaving || isCompleting,
     refresh,
     saveOrg,
     finishOnboarding,

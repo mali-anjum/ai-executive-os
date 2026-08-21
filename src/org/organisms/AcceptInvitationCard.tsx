@@ -9,8 +9,11 @@ import { useAcceptInvitation } from "@/org/hooks/useAcceptInvitation";
  * Rendered after authentication when the user's email has a pending invitation.
  * Accepting joins the existing organization (never creates a new one) and syncs
  * the Supabase user_metadata so RLS scopes subsequent requests to that tenant.
+ *
+ * The target org id comes from the invite link (`?org=<org_id>`); the RPC
+ * validates the pending invitation for the caller's email in that org.
  */
-export function AcceptInvitationCard() {
+export function AcceptInvitationCard({ targetOrgId }: { targetOrgId?: string }) {
   const router = useRouter();
   const { state, accept } = useAcceptInvitation();
 
@@ -33,15 +36,21 @@ export function AcceptInvitationCard() {
         {state.status === "error" ? (
           <p className="text-sm text-destructive">{state.message}</p>
         ) : null}
-        <Button onClick={() => void accept()} isLoading={state.status === "checking"}>
-          Accept invitation
-        </Button>
-        {state.status === "none" ? (
-          <p className="text-xs text-muted-foreground">
-            No pending invitation found for your email.
+        {!targetOrgId ? (
+          <p className="text-sm text-muted-foreground">
+            Invitation link is missing the workspace id. Use the link from your
+            invitation email.
           </p>
-        ) : null}
+        ) : (
+          <Button
+            onClick={() => void accept(targetOrgId)}
+            isLoading={state.status === "checking"}
+          >
+            Accept invitation
+          </Button>
+        )}
       </CardContent>
     </Card>
   );
 }
+
