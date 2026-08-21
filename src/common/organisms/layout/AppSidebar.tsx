@@ -84,6 +84,7 @@ export function AppSidebar({ className }: { className?: string }) {
 
   const primary = primaryNav.filter(visible);
   const secondary = secondaryNav.filter(visible);
+  const allNav = [...primary, ...secondary];
 
   return (
     <aside
@@ -97,21 +98,10 @@ export function AppSidebar({ className }: { className?: string }) {
       </div>
 
       <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-3" aria-label="Main">
-        {primary.map((item) => (
+        {allNav.map((item) => (
           <NavLink key={item.href} item={item} onNavigate={close} />
         ))}
       </nav>
-
-      {secondary.length > 0 ? (
-        <>
-          <Separator className="mx-3" />
-          <nav className="p-3 pt-2" aria-label="Secondary">
-            {secondary.map((item) => (
-              <NavLink key={item.href} item={item} onNavigate={close} />
-            ))}
-          </nav>
-        </>
-      ) : null}
 
       <div className="border-t border-border p-4">
         <p className="text-[11px] leading-relaxed text-muted-foreground">

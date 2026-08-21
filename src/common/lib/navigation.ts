@@ -1,6 +1,5 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  BarChart3,
   BookOpen,
   LayoutDashboard,
   MessageSquare,
@@ -53,14 +52,6 @@ export const primaryNav: NavItem[] = [
 ];
 
 export const secondaryNav: NavItem[] = [
-  {
-    href: "/dashboard",
-    label: "Analytics",
-    description: "Usage & performance",
-    icon: BarChart3,
-    flag: "ANALYTICS_DASHBOARD_ENABLED",
-    leadershipOnly: true,
-  },
   {
     href: "/team",
     label: "Team",
