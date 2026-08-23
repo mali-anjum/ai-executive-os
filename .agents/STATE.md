@@ -118,4 +118,3 @@
   data in Redux slices (use RTK Query). Design tokens only (no raw hex). Screens
   import only their module + `@/common/*`. Reuse existing hooks/endpoints/
   components before creating new ones (see `remember` skill + `imprint` registry).
-
